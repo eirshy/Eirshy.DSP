@@ -32,6 +32,8 @@ namespace Eirshy.DSP.ReBuffer.WithRythmn {
     //    it over SetFunction with __state.
 
     #endregion
+    //BUGS:
+    //- on save load without tool, jello-makers can get stuck (really weird).
 
     static class LabComponentDancer {
         const int LOCKED = -1;
