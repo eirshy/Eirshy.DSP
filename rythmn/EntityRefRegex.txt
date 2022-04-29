@@ -1,0 +1,139 @@
+﻿(\S+)\s(\S+)\s(\S+)\s(\S+)
+    $1 Entity.*Id, lowercase
+    $2 Entity.*Id, capitalized
+    $3 Component Type
+    $4 Factory.* -> pool
+
+belt Belt BeltComponent cargoTraffic.beltPool
+splitter Splitter SplitterComponent cargoTraffic.splitterPool
+monitor Monitor MonitorComponent cargoTraffic.monitorPool
+spraycoater Spraycoater SpraycoaterComponent cargoTraffic.spraycoaterPool
+piler Piler PilerComponent cargoTraffic.pilerPool
+speaker Speaker SpeakerComponent digitalSystem.speakerPool
+storage Storage StorageComponent factoryStorage.storagePool
+tank Tank TankComponent factoryStorage.tankPool
+miner Miner MinerComponent factorySystem.minerPool
+inserter Inserter InserterComponent factorySystem.inserterPool
+assembler Assembler AssemblerComponent factorySystem.assemblerPool
+fractionator Fractionator FractionatorComponent factorySystem.fractionatorPool
+ejector Ejector EjectorComponent factorySystem.ejectorPool
+silo Silo SiloComponent factorySystem.siloPool
+lab Lab LabComponent factorySystem.labPool
+station Station StationComponent transport.stationPool
+powerGen PowerGen PowerGeneratorComponent powerSystem.genPool
+powerNode PowerNode PowerNodeComponent powerSystem.nodePool
+powerCon PowerCon PowerConsumerComponent powerSystem.consumerPool
+powerAcc PowerAcc PowerAccumulatorComponent powerSystem.accPool
+powerExc PowerExc PowerExchangerComponent powerSystem.excPool
+
+
+
+#region Basic-Instance $3 
+/// <summary>
+/// True if our Entity's $1Id does not point to the null $3
+/// </summary>
+public bool Has_$3 => Entity.$1Id != EntityData.Null.$1Id;
+/// <summary>
+/// Whether our $3 in Factory matches our Entity.
+/// </summary>
+/// <remarks>
+/// Equivalent to calling <c>CheckEntity</c> on the result of <c>GetLive_$3</c>
+/// <br />
+/// Provided first-class because this is the relationship the game itself checks \(circa v0.9.24\)
+/// </remarks>
+public bool HasActive_$3 => Entity.id == Factory.$4[Entity.$1Id].entityId;
+/// <summary>
+/// Gets a live reference to the $3 this entity points to.
+/// <br />DO NOT edit it directly! Save it to a local ref-var first!
+/// </summary>
+public ref $3 GetLive_$3\(\) => ref Factory.$4[Entity.$1Id];
+/// <summary>
+/// Checks whether the component matches our Entity
+/// </summary>
+public bool CheckEntity\(ref $3 cmp\) => Entity.id == cmp.entityId;
+/// <summary>
+/// Checks whether our Entity matches the component
+/// </summary>
+public bool CheckComponent\(ref $3 cmp\) => Entity.$1Id == cmp.id;
+/// <summary>
+/// Checks whether both our Entity and the component match eachother.
+/// </summary>
+public bool CheckCircular\(ref $3 cmp\) => Entity.id == cmp.entityId && Entity.$1Id == cmp.id;
+
+#endregion
+
+
+
+#region Basic-Static $3 
+/// <summary>
+/// True if the entity's $1Id does not point to the null $3
+/// </summary>
+/// <remarks></remarks>
+public static bool Uses_$3\(in EntityData entity\) => entity.$1Id != EntityData.Null.$1Id;
+/// <summary>
+/// True if the entity's $1Id does not point to the null $3
+/// </summary>
+/// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
+public static bool Uses_$3\(EntityData entity\) => entity.$1Id != EntityData.Null.$1Id;
+/// <summary>
+/// True if the entity's $3 in the factory matches the entity.
+/// </summary>
+/// <remarks>
+/// Equivalent to calling <c>CheckEntity</c> on the result of <c>GetLive_$3</c>
+/// <br />
+/// Provided first-class because this is the relationship the game itself checks \(circa v0.9.24\)
+/// </remarks>
+public static bool UsesActive_$3\(PlanetFactory factory, in EntityData entity\) {
+    return entity.id == factory.$4[entity.$1Id].entityId;
+}
+/// <summary>
+/// Gets a live reference to entity's $3 in factory.
+/// </summary>
+public static ref $3 GetLive_$3\(PlanetFactory factory, in EntityData entity\) {
+    return ref factory.$4[entity.$1Id];
+}
+/// <summary>
+/// Gets a live reference to id's $3 in factory.
+/// </summary>
+public static ref $3 GetLive_$3\(PlanetFactory factory, int poolId\) {
+    return ref factory.$4[poolId];
+}
+//no LINQ-helper GetLive because that doesn't work that way lol -- Eirshy
+/// <summary>
+/// Checks whether the component matches the entity.
+/// </summary>
+public static bool CheckEntity\(in EntityData entity, in $3 cmp\) {
+    return entity.id == cmp.entityId;
+}
+/// <summary>
+/// Checks whether the entity matches the component.
+/// </summary>
+public static bool CheckComponent\(in EntityData entity, in $3 cmp\) {
+    return entity.$1Id == cmp.id;
+}
+/// <summary>
+/// Checks whether both the entity and the component match eachother.
+/// </summary>
+public static bool CheckCircular\(in EntityData entity, in $3 cmp\) {
+    return entity.id == cmp.entityId && entity.$1Id == cmp.id;
+}
+
+#endregion
+
+
+
+
+#region Basic-LINQ $3
+
+/// <summary>
+/// True if the entity's $1Id does not point to the null $3
+/// </summary>
+/// <remarks>Provided as a LINQ helper.</remarks>
+public static bool Uses_$3\(EntityRef entr\) => entr.Has_$3;
+/// <summary>
+/// True if the entity's $3 in the factory matches the entity.
+/// </summary>
+/// <remarks>Provided as a LINQ helper.</remarks>
+public static bool UsesActive_$3\(EntityRef entr\) => entr.HasActive_$3;
+
+#endregion
