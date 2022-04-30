@@ -571,16 +571,20 @@ namespace Eirshy.DSP.ReBuffer.WithRythmn {
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void InternalUpdateResearch_inlineConsume(ref LabComponent __instance, int i, int iHashUp, ref int proli, int[] consumeRegister) {
-            if(__instance.matrixServed[i] > 0 && __instance.matrixPoints[i] > 0) {
+            if(__instance.matrixPoints[i] > 0) {
                 var consume = __instance.matrixPoints[i] * iHashUp;
 
                 int ipi = __instance.matrixIncServed[i] / __instance.matrixServed[i];
-                __instance.matrixServed[i] -= consume;
                 __instance.matrixIncServed[i] -= ipi * consume;
                 if(ipi < proli) proli = ipi;
 
-                //This was not originally locked, but odds are not low that LabCmp / AssembleCmp could be simul some day
-                Interlocked.Add(ref consumeRegister[LabComponent.matrixIds[i]], consume / JELLO_CALORIES);
+                //can't avoid this, consume register doesn't track partials
+                var jelloStart = __instance.matrixServed[i] / JELLO_CALORIES;
+                __instance.matrixServed[i] -= consume;
+                var jelloEnd = __instance.matrixServed[i] / JELLO_CALORIES;
+
+                //This was not originally locked, but odds are not low that LabCmp / AssembleCmp / etc will probably be simul'd
+                Interlocked.Add(ref consumeRegister[LabComponent.matrixIds[i]], jelloStart - jelloEnd);
             }
         }
 

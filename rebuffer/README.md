@@ -7,6 +7,7 @@ It does this by *re*-placing the highly-efficient constants in the game's origin
 
 ## Changes
 
+- v0.1.3<br />Fixed integer rounding issues causing us to misregister how much jello we eat on research.
 - v0.1.2<br />Removed some on-further-consideration-unnecessary thread guards from non-collapsed labs.
 - v0.1.1<br />Fixed the readme and added the missing BepInEX dep.
 
