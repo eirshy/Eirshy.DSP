@@ -51,54 +51,54 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             ref var next = ref labPool[__instance.nextLabId];
             //Matrix Mode is literally !researchMode && recipeId != 0.
             if(__instance.researchMode) {
-                if(UpdateOutputToNext_inlineNeedJelloUp(ref __instance, ref next, 0)) {
+                if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 0)) {
                     UpdateOutputToNext_inlineJelloUp(ref __instance, ref next, 0);
                 }
-                if(UpdateOutputToNext_inlineNeedJelloUp(ref __instance, ref next, 1)) {
+                if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 1)) {
                     UpdateOutputToNext_inlineJelloUp(ref __instance, ref next, 1);
                 }
-                if(UpdateOutputToNext_inlineNeedJelloUp(ref __instance, ref next, 2)) {
+                if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 2)) {
                     UpdateOutputToNext_inlineJelloUp(ref __instance, ref next, 2);
                 }
-                if(UpdateOutputToNext_inlineNeedJelloUp(ref __instance, ref next, 3)) {
+                if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 3)) {
                     UpdateOutputToNext_inlineJelloUp(ref __instance, ref next, 3);
                 }
-                if(UpdateOutputToNext_inlineNeedJelloUp(ref __instance, ref next, 4)) {
+                if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 4)) {
                     UpdateOutputToNext_inlineJelloUp(ref __instance, ref next, 4);
                 }
-                if(UpdateOutputToNext_inlineNeedJelloUp(ref __instance, ref next, 5)) {
+                if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 5)) {
                     UpdateOutputToNext_inlineJelloUp(ref __instance, ref next, 5);
                 }
             } else if(__instance.recipeId != 0) {
                 //transfer from inst to next
                 switch(__instance.served.Length) {
                     case 6:
-                        if(UpdateOutputToNext_inlineNeedServeUp(ref __instance, ref next, 5)) {
+                        if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 5)) {
                             UpdateOutputToNext_inlineServeUp(ref __instance, ref next, 5);
                         }
                         goto case 5;
                     case 5:
-                        if(UpdateOutputToNext_inlineNeedServeUp(ref __instance, ref next, 4)) {
+                        if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 4)) {
                             UpdateOutputToNext_inlineServeUp(ref __instance, ref next, 4);
                         }
                         goto case 4;
                     case 4:
-                        if(UpdateOutputToNext_inlineNeedServeUp(ref __instance, ref next, 3)) {
+                        if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 3)) {
                             UpdateOutputToNext_inlineServeUp(ref __instance, ref next, 3);
                         }
                         goto case 3;
                     case 3:
-                        if(UpdateOutputToNext_inlineNeedServeUp(ref __instance, ref next, 2)) {
+                        if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 2)) {
                             UpdateOutputToNext_inlineServeUp(ref __instance, ref next, 2);
                         }
                         goto case 2;
                     case 2:
-                        if(UpdateOutputToNext_inlineNeedServeUp(ref __instance, ref next, 1)) {
+                        if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 1)) {
                             UpdateOutputToNext_inlineServeUp(ref __instance, ref next, 1);
                         }
                         goto case 1;
                     case 1:
-                        if(UpdateOutputToNext_inlineNeedServeUp(ref __instance, ref next, 0)) {
+                        if(UpdateOutputToNext_inlineWillUp(ref __instance, ref next, 0)) {
                             UpdateOutputToNext_inlineServeUp(ref __instance, ref next, 0);
                         }
                         break;
@@ -113,7 +113,13 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool UpdateOutputToNext_inlineNeedServeUp(ref LabComponent __instance, ref LabComponent next, int i) {
+        static bool UpdateOutputToNext_inlineWillUp(ref LabComponent __instance, ref LabComponent next, int i) {
+            //no locking needed, needs is immutable at this step if we don't mutate it, so if we require
+            //  needs to be met, by __inst and not-met by next, we have guaranteed safety thanks to sniffing
+            //  a this-point-in-the-tick immutable aspect of the state
+            return __instance.needs[i] == 0 && next.needs[i] > 0;
+            //old hijack-for-lock based for matrixMode
+            /*
             if(__instance.served[i] <= __instance.requireCounts[i] || next.needs[i] <= 0) return false;//wont transfer
             if(0 != Interlocked.CompareExchange(ref __instance.needs[i], LOCKED, 0)) return false;
             if(0 >= Interlocked.CompareExchange(ref next.needs[i], LOCKED, __instance.requires[i])) {
@@ -122,10 +128,23 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
                 return false;
             }
             return true;
+            /**/
+            //old hijack-for-lock based researchMode
+            /*
+            if(__instance.matrixServed[i] <= JELLO_CALORIES || next.needs[i] <= 0) return false;//wont transfer 
+            if(0 != Interlocked.CompareExchange(ref __instance.needs[i], LOCKED, 0)) return false;
+            if(0 >= Interlocked.CompareExchange(ref next.needs[i], LOCKED, 6001 + i)) {
+                //release self, we failed to get next.
+                __instance.needs[i] = 0;
+                return false;
+            }
+            return true;
+            /**/
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void UpdateOutputToNext_inlineServeUp(ref LabComponent __instance, ref LabComponent next, int i) {
-            int transCnt = MIN2(__instance.served[i] - __instance.requireCounts[i], next.requireCounts[i]);
+            int transCnt = next.requireCounts[i];
+            //^^^ guaranteed available by how Needs works, as we always have at least 1x this if our needs are met
             if(transCnt > 0) {
                 //was: split_inc ... which is needlessly complex lol
                 int ipi = __instance.incServed[i] / __instance.served[i];
@@ -138,19 +157,9 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool UpdateOutputToNext_inlineNeedJelloUp(ref LabComponent __instance, ref LabComponent next, int i) {
-            if(__instance.matrixServed[i] <= JELLO_CALORIES || next.needs[i] <= 0) return false;//wont transfer 
-            if(0 != Interlocked.CompareExchange(ref __instance.needs[i], LOCKED, 0)) return false;
-            if(0 >= Interlocked.CompareExchange(ref next.needs[i], LOCKED, 6001 + i)) {
-                //release self, we failed to get next.
-                __instance.needs[i] = 0;
-                return false;
-            }
-            return true;
-        }
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void UpdateOutputToNext_inlineJelloUp(ref LabComponent __instance, ref LabComponent next, int i) {
-            int transCnt = MIN2(__instance.matrixServed[i] - JELLO_CALORIES, JELLO_CALORIES);
+            int transCnt = JELLO_CALORIES;
+            //^^^ guaranteed available by how Needs works, as we always have at least 1x this if our needs are met
             if(transCnt > 0) {
                 //was: split_inc ... which is needlessly complex lol
                 int ipi = __instance.matrixIncServed[i] / __instance.matrixServed[i];
@@ -199,17 +208,8 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
                 return;
             }
 
-            if(__instance.extraTime >= __instance.extraTimeSpend) {
-                switch(__instance.products.Length) {
-                    case 6: InternalUpdate_inlineAddProd(ref __instance, 5, productRegister); goto case 5;
-                    case 5: InternalUpdate_inlineAddProd(ref __instance, 4, productRegister); goto case 4;
-                    case 4: InternalUpdate_inlineAddProd(ref __instance, 3, productRegister); goto case 3;
-                    case 3: InternalUpdate_inlineAddProd(ref __instance, 2, productRegister); goto case 2;
-                    case 2: InternalUpdate_inlineAddProd(ref __instance, 1, productRegister); goto case 1;
-                    case 1: InternalUpdate_inlineAddProd(ref __instance, 0, productRegister); break;
-                }
-                __instance.extraTime -= __instance.extraTimeSpend;
-            }
+            //reorderd to skip a single jge, because why not, it's a free ops-1.
+
             if(__instance.time >= __instance.timeSpend) {
                 var prods = __instance.products.Length;
                 __instance.replicating = false;
@@ -235,6 +235,19 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
                 __instance.extraPowerRatio = 0;
                 __instance.time -= __instance.timeSpend;
             }
+
+            if(__instance.extraTime >= __instance.extraTimeSpend) {
+                switch(__instance.products.Length) {
+                    case 6: InternalUpdate_inlineAddProd(ref __instance, 5, productRegister); goto case 5;
+                    case 5: InternalUpdate_inlineAddProd(ref __instance, 4, productRegister); goto case 4;
+                    case 4: InternalUpdate_inlineAddProd(ref __instance, 3, productRegister); goto case 3;
+                    case 3: InternalUpdate_inlineAddProd(ref __instance, 2, productRegister); goto case 2;
+                    case 2: InternalUpdate_inlineAddProd(ref __instance, 1, productRegister); goto case 1;
+                    case 1: InternalUpdate_inlineAddProd(ref __instance, 0, productRegister); break;
+                }
+                __instance.extraTime -= __instance.extraTimeSpend;
+            }
+
             if(!__instance.replicating) {
                 int reqs = __instance.requireCounts.Length;
                 switch(reqs) {

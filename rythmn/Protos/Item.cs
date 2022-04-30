@@ -87,7 +87,7 @@ namespace Eirshy.DSP.Rythmn.Protos {
         public static Item FuelDT => new Item(1802, _Roles.Fuel);
         public static Item FuelH => new Item(1801, _Roles.Fuel);
         #endregion
-        #region SCIence cubes (with color alias)
+        #region SCIence cubes (by color)
         /// <summary>
         /// Electro-Magnetism
         /// </summary>

@@ -5,7 +5,12 @@ Then this is the answer. ***Re*-Buffer** lets you re-define the buffer sizes on 
 
 It does this by *re*-placing the highly-efficient constants in the game's original code with values loaded from a config file- and then over-paying the performance cost by *re*-writing and *re*-optimizing all of the code around it. Over all, your game should actually run at least as fast, if not *faster* by using this mod. At least, until the devs get around to rewriting these sections themselves.
 
-### Mechanical changes compared to vanilla
+## Changes
+
+- v0.1.2<br />Removed some on-further-consideration-unnecessary thread guards from non-collapsed labs.
+- v0.1.1<br />Fixed the readme and added the missing BepInEX dep.
+
+## Mechanical changes compared to vanilla
 As a note, part of the speed gain is by allowing certain mechanical edge-cases to just happen, as well as changing certain behaviors. Notably...
 - ***Proliferator residue is not aggressively cleaned out of each slot.***<br />Mixing item types of different levels will still use the lowest level, but a single item kind with mixed levels won't "lose" the extra proliferator.
 - ***Research Labs no longer "lose" spare hash byte upont tech completion or rate limiting.***

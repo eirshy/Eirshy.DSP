@@ -340,17 +340,8 @@ namespace Eirshy.DSP.ReBuffer.WithRythmn {
             var dimmaSpeedPrc = 1f + (DimmaRefSpeedPrc(dome) / 100f);
             DimmaClearSpeedPrc(dome);
 
-            if(__instance.extraTime >= __instance.extraTimeSpend) {
-                switch(__instance.products.Length) {
-                    case 6: InternalUpdate_inlineAddProd(ref __instance, 5, productRegister); goto case 5;
-                    case 5: InternalUpdate_inlineAddProd(ref __instance, 4, productRegister); goto case 4;
-                    case 4: InternalUpdate_inlineAddProd(ref __instance, 3, productRegister); goto case 3;
-                    case 3: InternalUpdate_inlineAddProd(ref __instance, 2, productRegister); goto case 2;
-                    case 2: InternalUpdate_inlineAddProd(ref __instance, 1, productRegister); goto case 1;
-                    case 1: InternalUpdate_inlineAddProd(ref __instance, 0, productRegister); break;
-                }
-                __instance.extraTime -= __instance.extraTimeSpend;
-            }
+            //reorderd to skip a single jge, because why not, it's a free ops-1.
+
             if(__instance.time >= __instance.timeSpend) {
                 var prods = __instance.products.Length;
                 __instance.replicating = false;
@@ -376,6 +367,19 @@ namespace Eirshy.DSP.ReBuffer.WithRythmn {
                 __instance.extraPowerRatio = 0;
                 __instance.time -= __instance.timeSpend;
             }
+
+            if(__instance.extraTime >= __instance.extraTimeSpend) {
+                switch(__instance.products.Length) {
+                    case 6: InternalUpdate_inlineAddProd(ref __instance, 5, productRegister); goto case 5;
+                    case 5: InternalUpdate_inlineAddProd(ref __instance, 4, productRegister); goto case 4;
+                    case 4: InternalUpdate_inlineAddProd(ref __instance, 3, productRegister); goto case 3;
+                    case 3: InternalUpdate_inlineAddProd(ref __instance, 2, productRegister); goto case 2;
+                    case 2: InternalUpdate_inlineAddProd(ref __instance, 1, productRegister); goto case 1;
+                    case 1: InternalUpdate_inlineAddProd(ref __instance, 0, productRegister); break;
+                }
+                __instance.extraTime -= __instance.extraTimeSpend;
+            }
+
             if(!__instance.replicating) {
                 int reqs = __instance.requireCounts.Length;
                 switch(reqs) {

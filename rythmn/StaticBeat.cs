@@ -31,7 +31,7 @@ namespace Eirshy.DSP.Rythmn {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
         static void SetTheStage(string saveName) {
-            if(DSPGame.IsMenuDemo) return;
+            //We should run when the game's menu loads
             try {
                 if(!SetupDone) {
                     if(_setups.IsValueCreated) {
