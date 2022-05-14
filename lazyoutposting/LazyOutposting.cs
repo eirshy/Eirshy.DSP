@@ -19,8 +19,10 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "0.1.0.0";
+        public const string VERSION = "1.0.0.0";
         public const string NAME = "Lazy Outposting";
+
+        internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";
 
         internal static Harmony Harmony => _harmony.Value;
         readonly static Lazy<Harmony> _harmony = new Lazy<Harmony>(() => new Harmony(GUID));
@@ -29,24 +31,19 @@ namespace Eirshy.DSP.LazyOutposting {
 
         internal static bool EnableDwarvenCommute { get; private set; }
         internal static bool EnableVaporCollection { get; private set; }
-        internal static bool EnableTexanFeverDream { get; private set; }
 
         private void Awake() {
             Logs = Logger;
-            Logger.LogMessage("Lazy Outposting - For anywhere but Hoxxes IV!");
+            Logger.LogMessage($"Lazy Outposting - For anywhere but Hoxxes IV!");
 
             //config
             const string hdr = nameof(LazyOutposting);
-            EnableDwarvenCommute = Config.Bind<bool>(hdr, nameof(EnableDwarvenCommute), false, new ConfigDescription(
+            EnableDwarvenCommute = Config.Bind<bool>(hdr, nameof(EnableDwarvenCommute), true, new ConfigDescription(
                 "If we should enable planet-wide mining."
             )).Value;
-            EnableVaporCollection = Config.Bind<bool>(hdr, nameof(EnableVaporCollection), false, new ConfigDescription(
-                "If we should enable ocean collection regardless of water access."
+            EnableVaporCollection = Config.Bind<bool>(hdr, nameof(EnableVaporCollection), true, new ConfigDescription(
+                "If we should enable ocean collection regardless of said ocean being accessible."
             )).Value;
-
-            //EnableTexanFeverDream = Config.Bind<bool>(hdr, nameof(EnableTexanFeverDream), false, new ConfigDescription(
-            //    "If we should enable ocean collection regardless of water access."
-            //)).Value;
 
             if(EnableDwarvenCommute) Harmony.PatchAll(typeof(DwarvenCommute));
             if(EnableVaporCollection) Harmony.PatchAll(typeof(VaporCollection));
