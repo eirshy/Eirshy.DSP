@@ -9,6 +9,7 @@ Should also be vaguely more-performant than PlanetaryMining was, but not in a wa
 
 ## Changes
 
+- v1.0.1 fixed nullref error on some bp pastings
 - v1.0.0 release
 
 ## Controls

@@ -23,7 +23,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
         static void PresentForgedPapers(BuildTool_Click __instance, ref List<BuildPreview> __state) {
             foreach(var pv in __instance.buildPreviews) {
                 if(pv is null) continue;
-                if(pv.desc.waterPoints.Length == 0) continue;//must require ocean
+                if(pv.desc.waterPoints is null || pv.desc.waterPoints.Length == 0) continue;//must require ocean
                 if(pv.desc.geothermal) continue;//lava has additional calculations
 
                 //Don't need anything special here, pumps are automatic so long as they can be placed.
@@ -39,14 +39,14 @@ namespace Eirshy.DSP.LazyOutposting.Components {
         [HarmonyPatch(typeof(BuildTool_BlueprintPaste), nameof(BuildTool_BlueprintPaste.CheckBuildConditions))]
         static void PresentForgedPapers(BuildTool_BlueprintPaste __instance, ref List<BuildPreview> __state) {
             foreach(var pv in __instance.bpPool) {
-                if(pv is null) continue;
-                if(pv.desc.waterPoints.Length == 0) continue;//must require ocean
+                if(pv is null || pv.desc is null) continue;
+                if(pv.desc.waterPoints is null || pv.desc.waterPoints.Length == 0) continue;//must require ocean
                 if(pv.desc.geothermal) continue;//lava has additional calculations
 
                 //Don't need anything special here, pumps are automatic so long as they can be placed.
 
                 //forge the prefabDesc to claim we're not a vein miner, and let our postfix know to undo it.
-                if(__state == null) __state = new List<BuildPreview>(__instance.buildPreviews.Count);
+                if(__state == null) __state = new List<BuildPreview>(__instance.bpPool.Length / 2);
                 pv.desc = GetForgery(pv);
                 __state.Add(pv);
             }
