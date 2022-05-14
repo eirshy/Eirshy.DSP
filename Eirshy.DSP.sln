@@ -5,11 +5,13 @@ VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.Rythmn", "rythmn\Eirshy.DSP.Rythmn.csproj", "{1A61B06A-A422-4246-AFBD-6558E05E7CF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.StaticCompression", "static-compression\Eirshy.DSP.StaticCompression.csproj", "{924D1386-1321-4F5E-A243-B7D5C4DDBD71}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.@Local", "local\Eirshy.DSP.@Local.csproj", "{FF0646D5-CD07-4AA9-BA4B-6CD41D5CEAA4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.ReBuffer", "rebuffer\Eirshy.DSP.ReBuffer.csproj", "{9E6A18B6-A3F0-4294-B45D-630A090DC997}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.StaticCompression", "static-compression\Eirshy.DSP.StaticCompression.csproj", "{23E19D4A-8233-4EF1-9B34-4421098D2D18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eirshy.DSP.LazyOutposting", "lazyoutposting\Eirshy.DSP.LazyOutposting.csproj", "{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +23,6 @@ Global
 		{1A61B06A-A422-4246-AFBD-6558E05E7CF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A61B06A-A422-4246-AFBD-6558E05E7CF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A61B06A-A422-4246-AFBD-6558E05E7CF7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{924D1386-1321-4F5E-A243-B7D5C4DDBD71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{924D1386-1321-4F5E-A243-B7D5C4DDBD71}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{924D1386-1321-4F5E-A243-B7D5C4DDBD71}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{924D1386-1321-4F5E-A243-B7D5C4DDBD71}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FF0646D5-CD07-4AA9-BA4B-6CD41D5CEAA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FF0646D5-CD07-4AA9-BA4B-6CD41D5CEAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF0646D5-CD07-4AA9-BA4B-6CD41D5CEAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +31,14 @@ Global
 		{9E6A18B6-A3F0-4294-B45D-630A090DC997}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E6A18B6-A3F0-4294-B45D-630A090DC997}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E6A18B6-A3F0-4294-B45D-630A090DC997}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23E19D4A-8233-4EF1-9B34-4421098D2D18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23E19D4A-8233-4EF1-9B34-4421098D2D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23E19D4A-8233-4EF1-9B34-4421098D2D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23E19D4A-8233-4EF1-9B34-4421098D2D18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

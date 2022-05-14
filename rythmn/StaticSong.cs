@@ -56,7 +56,7 @@ namespace Eirshy.DSP.Rythmn {
             ;
             return this;
         }
-        public StaticSong HamonyPatchAll(Lazy<Harmony> harmony) {
+        public StaticSong HarmonyPatchAll(Lazy<Harmony> harmony) {
             Values.Where(sv => sv.HasHarmonyPatches)
                 .Select(sv => sv.GetType())
                 .DoForEach(sv => harmony.Value.PatchAll(sv));

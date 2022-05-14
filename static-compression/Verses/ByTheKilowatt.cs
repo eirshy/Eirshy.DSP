@@ -9,6 +9,9 @@ using BepInEx.Configuration;
 using Eirshy.DSP.Rythmn;
 using Eirshy.DSP.Rythmn.Enums;
 
+//That's not how acc timing works...
+//  Might have to actually do overrides on ExchangerComponent to make it possible to change time-per
+
 namespace Eirshy.DSP.StaticCompression.Verses {
     class ByTheKilowatt : StaticVerse {
         public override EOnLoadPrefabSync WillNeedSyncsFor => 

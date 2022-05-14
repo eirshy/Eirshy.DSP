@@ -3,7 +3,7 @@ Ever look at a smelter and think *"Why's this thing got 100 iron plates just sit
 
 Then this is the answer. ***Re*-Buffer** lets you re-define the buffer sizes on Assemblers, Chem Labs, *Re*-fineries, Particle Colliders, and *Re*-search labs- and possibly more in the future (probably miners).
 
-It does this by *re*-placing the highly-efficient constants in the game's original code with values loaded from a config file- and then over-paying the performance cost by *re*-writing and *re*-optimizing all of the code around it. Over all, your game should actually run at least as fast, if not *faster* by using this mod. At least, until the devs get around to rewriting these sections themselves.
+It does this by *re*-placing the highly-efficient constants in the game's original code with values loaded from a config file- and then over-paying the performance cost by *re*-writing and *re*-optimizing all of the code around it. Over all, your game should actually run at least as fast, if not *faster* by using this mod. At least, until the devs get around to *re*-writing these sections themselves.
 
 ## Changes
 

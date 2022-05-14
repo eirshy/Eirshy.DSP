@@ -21,6 +21,7 @@ namespace Eirshy.DSP.Rythmn {
         public const string VERSION = "1.0.0.0";
         public const string NAME = "Rythmn Kit";
 
+        internal const string OTHER_MODS_LDBTOOL = "me.xiaoye97.plugin.Dyson.LDBTool";
         readonly static Lazy<Harmony> _harmony = new Lazy<Harmony>(() => new Harmony(GUID));
         internal static Harmony Harmony => _harmony.Value;
         public static ILogProvider LogProvider = null;
@@ -62,7 +63,7 @@ namespace Eirshy.DSP.Rythmn {
             }
         }
         void Hello() {
-            var bd = typeof(RythmnToolkit).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            var bd = typeof(RythmnKit).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
             if(System.IO.File.ReadAllLines(FILE).Length > 200) System.IO.File.Delete(FILE);
             Log($"\n\nRythmn Toolkit -- {bd}");
             FlushLog();

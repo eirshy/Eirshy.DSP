@@ -27,29 +27,41 @@ namespace Eirshy.DSP.Rythmn {
         }
 
         #region Harmony Hooks -- GameSave.LoadCurrentGame
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
-        static void SetTheStage(string saveName) {
-            //We should run when the game's menu loads
+        
+        static void _runSetup() {
             try {
-                if(!SetupDone) {
-                    if(_setups.IsValueCreated) {
-                        Logger.Log($"The Static Beat :: SETTING THE STAGE!");
-                        _setups.Value//already ordered, we're a sorted list
-                            .Select(kvp => kvp.Value)
-                            .DoForEach(act => act?.Invoke())
-                        ;
-                        _setups.Value.Clear();//let GC possibly have its toys back
-                    }
-                    SetupDone = true;
+                if(_setups.IsValueCreated) {
+                    Logger.Log($"The Static Beat :: SETTING THE STAGE!");
+                    _setups.Value//already ordered, we're a sorted list
+                        .Select(kvp => kvp.Value)
+                        .DoForEach(act => act?.Invoke())
+                    ;
+                    _setups.Value.Clear();//let GC possibly have its toys back
                 }
+                SetupDone = true;
             } catch(Exception ex) {
                 Logger.LogFatal(ex);
                 throw ex;
             } finally {
                 Logger.FlushLogBuffer();
             }
+        }
+
+
+        [HarmonyPostfix]
+        [HarmonyAfter(RythmnKit.OTHER_MODS_LDBTOOL)]
+        [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
+        static void VFSetTheStage() {
+            if(!SetupDone) _runSetup();
+        }
+
+        [HarmonyPrefix]
+        [HarmonyAfter(RythmnKit.OTHER_MODS_LDBTOOL)]
+        [HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
+        static void SetTheStage(string saveName) {
+            //We want anybody else doing a pre-load (ie, LDBTool) to go off first.
+            if(DSPGame.IsMenuDemo) return;
+            if(!SetupDone) _runSetup();
         }
 
         [HarmonyPostfix]
@@ -338,7 +350,6 @@ namespace Eirshy.DSP.Rythmn {
 
         static void SyncPowerAccumulator(EntityRef entr) {
             if(!entr.Has_PowerAccumulatorComponent) return;
-            if(entr.Has_StationComponent) return;//don't touch stations
             var proto = entr.GetItem();
             var desc = proto.prefabDesc;
             ref var comp = ref entr.GetLive_PowerAccumulatorComponent();
@@ -349,6 +360,7 @@ namespace Eirshy.DSP.Rythmn {
         }
         static void SyncPowerConsumer(EntityRef entr) {
             if(!entr.Has_PowerConsumerComponent) return;
+            if(entr.Has_StationComponent) return;//don't touch stations
             var proto = entr.GetItem();
             var desc = proto.prefabDesc;
             ref var comp = ref entr.GetLive_PowerConsumerComponent();

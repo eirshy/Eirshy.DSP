@@ -54,8 +54,6 @@ namespace Eirshy.DSP.Rythmn.Protos {
         public IEnumerable<TImplementor> E() => new[] { (TImplementor)this };
         public IEnumerable<TImplementor> E(params TImplementor[] args) => args.Prepend((TImplementor)this);
 
-        public static void _Dispose() => __all.Value.Clear();
-
         #region Reflection Magic and comfyifying stuff
 
         /// <summary>
