@@ -8,7 +8,7 @@ using BepInEx.Configuration;
 
 using Eirshy.DSP.Rythmn;
 using Eirshy.DSP.Rythmn.Enums;
-using Eirshy.DSP.Rythmn.Protos;
+using Eirshy.DSP.Rythmn.Utilities;
 
 namespace Eirshy.DSP.StaticCompression.Verses {
     class RailsAndSilos : StaticVerse {

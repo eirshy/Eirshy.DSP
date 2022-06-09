@@ -1,26 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using BepInEx.Configuration;
 using HarmonyLib;
 
 using Eirshy.DSP.Rythmn.Enums;
+using Eirshy.DSP.Rythmn.Utilities;
 using Eirshy.DSP.Rythmn.Logging;
 
 namespace Eirshy.DSP.Rythmn {
-
-    static class StaticBeat {
+    internal static class StaticBeat {
         static ILogProvider Logger => RythmnKit.LogProvider;
+        static EStationStorageSyncKeywords SSSMode = EStationStorageSyncKeywords.Never;
+        static int SSSMode_CurMaxThreshold = 0;
+        static StationStorageMatchSet SSSMode_MatchRegistry = null;
+
         internal static void SetUp(ConfigFile cf) {
             RythmnKit.Harmony.PatchAll(typeof(StaticBeat));
 
             const string HDR = nameof(StaticBeat);
+            const string HDR_STATIONSYNC = HDR + ".StationSync";
+
             bool forceAllSyncs = cf.Bind<bool>(HDR, nameof(forceAllSyncs), false, new ConfigDescription(
                 "If set, we'll run all known syncs regardless of which ones were requested." +
                 "\nEquivalent to calling" +
                 $" {nameof(RythmnKit)}.{nameof(RequestPrefabSync)}({nameof(EOnLoadPrefabSync)}.{EOnLoadPrefabSync._ALL_AVAILABLE});"
             )).Value;
+
+            var sssModeList = cf.Bind<string>(HDR_STATIONSYNC, nameof(SSSMode)
+                , $"{EStationStorageSyncKeywords.CurOverLimit} {EStationStorageSyncKeywords.TypeCollector}"
+                , new ConfigDescription(
+                "Space-delimeted list of mode names. Note that items will NOT be deleted, even when reducing." +
+                "\nOptions list (brackets for clarity):" +
+                $" [{EStationStorageSyncKeywords.Always}], [{EStationStorageSyncKeywords.Never}]\n" +
+                $", [{EStationStorageSyncKeywords.CurOverLimit}] reduces the max if it's over newMax" +
+                $", [{EStationStorageSyncKeywords.CurMaxThreshold}] enables {nameof(SSSMode_CurMaxThreshold)}" +
+                $", [{EStationStorageSyncKeywords.MatchRegistry}] enables {nameof(SSSMode_MatchRegistry)}]" +
+                $", [{EStationStorageSyncKeywords.TypeCollector}] sets max to newMax if the station is a Collector" +
+                $", [{EStationStorageSyncKeywords.TypeMiner}] sets max to newMax if the station is a Miner" +
+                ""
+            )).Value;
+
+            SSSMode = RythmnKit.ConfigSplit(sssModeList)
+                .Select(s => Enum.TryParse<EStationStorageSyncKeywords>(s, out var ret) ? ret : EStationStorageSyncKeywords._nomatch)
+                .Aggregate((nxt, cur) => cur | nxt)
+            ;
+            if(SSSMode.HasFlag(EStationStorageSyncKeywords._nomatch)) {
+                Logger.Log("StaticBeat -- Station Storage Sync Mode has unknown mode in list.");
+            }
+
+            SSSMode_CurMaxThreshold = cf.Bind<int>(HDR_STATIONSYNC, nameof(SSSMode_CurMaxThreshold), 20000, new ConfigDescription(
+                "If enabled, any station with its max set to at least this value will automatically be 'promoted' to newMax."
+            )).Value;
+
+            var SSSMode_ItemSDXRaw = cf.Bind<string>(HDR_STATIONSYNC, nameof(SSSMode_MatchRegistry), "", new ConfigDescription(
+                "If enabled, will read the given space-delimeted list of {Remote}{Local}[ItemID], and will set max to newMax if matched" +
+                "\nRemote and Local both expect to be single letters: 's' for supply, 'd' for demand, 'x' for storage/none, 'a' for any, capitalized to invert" +
+                "\nex1 : sd1001 : Iron Ore with Remote Supply and Local Demand" +
+                "\nex2 : dS1006 : Coal with Remote Demand but NOT Local Supply" +
+                "\nex3 : sa sX1210 xs1210 : Any Remote Supply, but warpers must either have supply remote and non-storage local, or storage remote and supply local"
+            )).Value;
+            var sssReg = new StationStorageMatchSet(SSSMode_ItemSDXRaw);
+            //turn off MatchRegistry (and let it be GC'd) if there's no matchers
+            if(!sssReg.HasMatchers) {
+                SSSMode &= ~EStationStorageSyncKeywords.MatchRegistry;
+            } else SSSMode_MatchRegistry = sssReg;
+
 
             //apply non-persisted
             if(forceAllSyncs) RequestPrefabSync(EOnLoadPrefabSync._ALL_AVAILABLE);
@@ -233,6 +280,7 @@ namespace Eirshy.DSP.Rythmn {
         static Action<GameData> _getSyncPre(EOnLoadPrefabSync sync) {
             switch(sync) {
                 default: return null;
+                case EOnLoadPrefabSync.TransportStation_Storage: return PreSyncStation_Storage;
             }
         }
         static Action<EntityRef> _getSync(EOnLoadPrefabSync sync) {
@@ -259,6 +307,8 @@ namespace Eirshy.DSP.Rythmn {
                 case EOnLoadPrefabSync.PowerNode: return SyncPowerNode;
 
                 case EOnLoadPrefabSync.TransportStation_Harvesting: return SyncStation_Harvesting;
+                case EOnLoadPrefabSync.TransportStation_Storage: return SyncStation_Storage;
+                case EOnLoadPrefabSync.TransportStation_Drones: return null;// SyncStation_Drones;
 
                 case EOnLoadPrefabSync.Other_Recipies: return SyncRecipes;
             }
@@ -467,7 +517,64 @@ namespace Eirshy.DSP.Rythmn {
             for(int i = 0; i < comp.collectionPerTick.Length; i++) {
                 comp.collectionPerTick[i] = planetData.gasSpeeds[i] * mult;
             }
+        }
+        
+        static int SyncStation_Storage_localReseachBonus = 0;
+        static int SyncStation_Storage_remoteReseachBonus = 0;
+        static void PreSyncStation_Storage(GameData gd) {
+            SyncStation_Storage_localReseachBonus = gd.history.localStationExtraStorage;
+            SyncStation_Storage_remoteReseachBonus = gd.history.remoteStationExtraStorage;
+        }
+        static void SyncStation_Storage(EntityRef entr) {
+            if(!entr.Has_StationComponent) return;
+            var proto = entr.GetItem();
+            var desc = proto.prefabDesc;
+            ref var comp = ref entr.GetLive_StationComponent();
+            //sync item counts
+            if(comp.storage.Length != desc.stationMaxItemKinds) {
+                if(comp.storage.Length < desc.stationMaxItemKinds) {
+                    Array.Resize(ref comp.storage, desc.stationMaxItemKinds);//ez
+                }else {//hard
+                    //drones also track indexen, so to actually re-arrange the entries
+                    //we'd have to scan for active drones and update them as well
+                    //That's Extra Hard, so instead just cull from the end if possible lol
+                    int keep = comp.storage.Length;
+                    while(keep > 0 && comp.storage[keep - 1].itemId == 0) keep--;
+                    if(keep < desc.stationMaxItemKinds) keep = desc.stationMaxItemKinds;
+                    Array.Resize(ref comp.storage, keep);
+                    //this is (basically) how the "clear item" action resets slots
+                    for(int i = 0; i<comp.slots.Length; i++) {
+                        if(comp.slots[i].storageIdx > keep) {
+                            comp.slots[i].storageIdx = 0;
+                            comp.slots[i].counter = 0;
+                            comp.slots[i].dir = IODir.Output;
+                        }
+                    }
+                }
+            }
 
+            //sync item maxes
+            if(SSSMode == EStationStorageSyncKeywords.Never) return;
+            var newMax = desc.stationMaxItemCount;
+            if(desc.isStellarStation) newMax += SyncStation_Storage_remoteReseachBonus;
+            else newMax += SyncStation_Storage_localReseachBonus;
+            var allMax = SSSMode.HasFlag(EStationStorageSyncKeywords.Always)
+                || desc.isCollectStation && SSSMode.HasFlag(EStationStorageSyncKeywords.TypeCollector)
+                || desc.isVeinCollector && SSSMode.HasFlag(EStationStorageSyncKeywords.TypeMiner)
+            ;
+
+            for(int i=0; i< comp.storage.Length; i++) {
+                //apply maxes. We don't have to worry about max being lower than count, game allows it.
+                if(false
+                    || (allMax && comp.storage[i].max != newMax)
+                    || (SSSMode.HasFlag(EStationStorageSyncKeywords.CurOverLimit) && comp.storage[i].max > newMax)
+                    || (SSSMode.HasFlag(EStationStorageSyncKeywords.CurMaxThreshold) && comp.storage[i].max >= SSSMode_CurMaxThreshold)
+                    || (SSSMode.HasFlag(EStationStorageSyncKeywords.MatchRegistry) && SSSMode_MatchRegistry.IsMatch(comp.storage[i]))
+                ) {
+                    comp.storage[i].max = newMax;
+                    continue;
+                }
+            }
         }
 
         #endregion

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Eirshy.DSP.Rythmn.Protos {
+namespace Eirshy.DSP.Rythmn.Utilities {
     public class Item : ProtoID<Item> {
         public enum _Roles {
             Factory, Logistics, Gatherer, PowerDelivery, Generator, SphereDepoly, Tower,

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 using BepInEx;
 using BepInEx.Configuration;
@@ -33,8 +34,40 @@ namespace Eirshy.DSP.Rythmn {
         }
 
 
-        #region Set up default LogProvider 
-#if DEBUG
+        static readonly Regex _cfgsplitter = new Regex(@"[^a-zA-Z0-9._-]+");
+        const string _cfgsplitter_glue = " ";
+
+        /// <summary>
+        /// Splits on regex: <c>[^a-zA-Z0-9._-]+</c>
+        /// </summary>
+        internal static string[] ConfigSplit(string s) {
+            if(string.IsNullOrWhiteSpace(s)) return Array.Empty<string>();
+            var ret = _cfgsplitter.Split(s).Where(s => s != "").ToArray();
+            if(ret.Length == 0
+                || (ret.Length == 1 && ret[0] == "")
+            ) {
+                return Array.Empty<string>();
+            }
+            return ret;
+        }
+        /// <summary>
+        /// Joins sa using the standard separator
+        /// </summary>
+        internal static string ConfigJoin(string[] sa) => string.Join(_cfgsplitter_glue, sa);
+        /// <summary>
+        /// Joins ies using the standard separator
+        /// </summary>
+        internal static string ConfigJoin(IEnumerable<string> ies) => string.Join(_cfgsplitter_glue, ies);
+        /// <summary>
+        /// Joins iet using the standard separator and T.ToString();
+        /// </summary>
+        internal static string ConfigJoin<T>(IEnumerable<T> iet) => string.Join(_cfgsplitter_glue, iet.Select(t=>t.ToString()));
+
+
+        #region Set up default LogProvider
+        //Set up to be switchable between BepIn and a manual buffered file log.
+        //If you've got the BepIn console open you don't really need to use a file log.
+        /** /
         static readonly string FILE = $"{Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}\\game hacking\\DysonSphere\\modlog.txt";
         static ConcurrentStack<string> _log = new ConcurrentStack<string>();
         static ConcurrentStack<string> _swap = new ConcurrentStack<string>();
@@ -70,12 +103,14 @@ namespace Eirshy.DSP.Rythmn {
         }
 
         void LoadLogger() => LogProvider = new CustomLogger(Log, FlushLog);
-#else
+        /*/
+
         void Hello() {
             Logger.LogMessage($"Rythmn Toolkit v{VERSION} -- Drums at the ready!");
         }
         void LoadLogger() => LogProvider = (BepInManualLogger)Logger;
-#endif
+        /**/
+
         #endregion
         #region Static Beat hoists:
 

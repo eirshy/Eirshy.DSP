@@ -8,7 +8,7 @@ using BepInEx.Configuration;
 using HarmonyLib;
 
 using Eirshy.DSP.Rythmn;
-using Eirshy.DSP.Rythmn.Protos;
+using Eirshy.DSP.Rythmn.Utilities;
 using Eirshy.DSP.Rythmn.Enums;
 
 namespace Eirshy.DSP.StaticCompression.Verses {

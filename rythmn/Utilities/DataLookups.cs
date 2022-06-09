@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace Eirshy.DSP.Rythmn.Protos {
+namespace Eirshy.DSP.Rythmn.Utilities {
     /// <summary>
-    /// Various 'standardized' looks for current values. 
+    /// Various 'standardized' lookups for current values. 
     /// </summary>
     /// <remarks>
     /// The term "PrefabUnit" means the whatever "units" the prefabDesc uses.

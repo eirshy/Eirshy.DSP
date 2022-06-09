@@ -40,15 +40,17 @@ namespace Eirshy.DSP.Rythmn.Enums {
         //unused: 21-22
 
         #endregion
-        #region Planet Transport (22+)
+        #region Planet Transport (22-29)
 
-        Transport_ALL = TransportStation_Harvesting,
+        Transport_ALL = TransportStation_Harvesting | TransportStation_Storage | TransportStation_Drones,
         TransportStation_Harvesting = 1 << 22,
-        //unused 22+
+        TransportStation_Storage = 1 << 23,
+        TransportStation_Drones = 1 << 24,
 
         #endregion
-        #region Other (31)
-
+        #region Other (30, 31)
+        
+        //unused: 30
         Other_Recipies = 1 << 31,
 
         #endregion

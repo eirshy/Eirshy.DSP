@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Linq;
 
 
-namespace Eirshy.DSP.Rythmn.Protos {
+namespace Eirshy.DSP.Rythmn.Utilities {
     public abstract class ProtoID {
         public abstract int Id { get; }
         protected string AsString { get; set; }
