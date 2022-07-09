@@ -32,12 +32,12 @@ namespace Eirshy.DSP.Rythmn {
             var sssModeList = cf.Bind<string>(HDR_STATIONSYNC, nameof(SSSMode)
                 , $"{EStationStorageSyncKeywords.CurOverLimit} {EStationStorageSyncKeywords.TypeCollector}"
                 , new ConfigDescription(
-                "Space-delimeted list of mode names. Note that items will NOT be deleted, even when reducing." +
+                "Space-delimited list of mode names. Note that items will NOT be deleted, even when reducing the max." +
                 "\nOptions list (brackets for clarity):" +
                 $" [{EStationStorageSyncKeywords.Always}], [{EStationStorageSyncKeywords.Never}]\n" +
                 $", [{EStationStorageSyncKeywords.CurOverLimit}] reduces the max if it's over newMax" +
                 $", [{EStationStorageSyncKeywords.CurMaxThreshold}] enables {nameof(SSSMode_CurMaxThreshold)}" +
-                $", [{EStationStorageSyncKeywords.MatchRegistry}] enables {nameof(SSSMode_MatchRegistry)}]" +
+                $", [{EStationStorageSyncKeywords.MatchRegistry}] enables {nameof(SSSMode_MatchRegistry)}" +
                 $", [{EStationStorageSyncKeywords.TypeCollector}] sets max to newMax if the station is a Collector" +
                 $", [{EStationStorageSyncKeywords.TypeMiner}] sets max to newMax if the station is a Miner" +
                 ""
@@ -56,7 +56,7 @@ namespace Eirshy.DSP.Rythmn {
             )).Value;
 
             var SSSMode_ItemSDXRaw = cf.Bind<string>(HDR_STATIONSYNC, nameof(SSSMode_MatchRegistry), "", new ConfigDescription(
-                "If enabled, will read the given space-delimeted list of {Remote}{Local}[ItemID], and will set max to newMax if matched" +
+                "If enabled, will read the given space-delimited list of {Remote}{Local}[ItemID], and will set max to newMax if matched" +
                 "\nRemote and Local both expect to be single letters: 's' for supply, 'd' for demand, 'x' for storage/none, 'a' for any, capitalized to invert" +
                 "\nex1 : sd1001 : Iron Ore with Remote Supply and Local Demand" +
                 "\nex2 : dS1006 : Coal with Remote Demand but NOT Local Supply" +
@@ -352,10 +352,13 @@ namespace Eirshy.DSP.Rythmn {
             comp.fluidOutputMax = desc.fracFluidOutputMax;
         }
         static void SyncInserter(EntityRef entr) {
-            if(!entr.Has_PowerNodeComponent) return;
+            if(!entr.Has_InserterComponent) return;
             var proto = entr.GetItem();
             var desc = proto.prefabDesc;
             ref var comp = ref entr.GetLive_InserterComponent();
+            
+            var curTime = comp.time / comp.stt;
+            
             //Might be able to infer STT's modifier via these values, but not sure.
             //can also use entr.Factory.ReadObjectConn() to get even more info; own-slots are 0 and 1.
             //comp.insertOffset;
@@ -583,6 +586,7 @@ namespace Eirshy.DSP.Rythmn {
         static void SyncRecipes(EntityRef entr) {
             if(entr.Has_AssemblerComponent) {
                 #region AssemblerComponent
+
                 ref var comp = ref entr.GetLive_AssemblerComponent();
                 if(comp.recipeType != ERecipeType.None) {
                     var recipeProto = LDB.recipes.Select(comp.recipeId);
@@ -592,32 +596,18 @@ namespace Eirshy.DSP.Rythmn {
                     comp.productive = recipeProto.productive;
                     comp.requires = recipeProto.Items;
                     comp.requireCounts = recipeProto.ItemCounts;
-                    if(comp.served.Length != recipeProto.Items.Length) {
-                        var old = comp.served;
-                        comp.served = new int[recipeProto.Items.Length];
-                        for(int i = 0; i < old.Length && i < comp.served.Length; i++) {
-                            comp.served[i] = old[i];
-                        }
-                        old = comp.incServed;
-                        comp.incServed = new int[recipeProto.Items.Length];
-                        for(int i = 0; i < old.Length && i < comp.incServed.Length; i++) {
-                            comp.incServed[i] = old[i];
-                        }
-                    }
+                    Array.Resize(ref comp.served, recipeProto.Items.Length);
+                    Array.Resize(ref comp.incServed, recipeProto.Items.Length);
                     comp.products = recipeProto.Results;
                     comp.productCounts = recipeProto.ResultCounts;
-                    if(comp.produced.Length != recipeProto.Results.Length) {
-                        var old = comp.produced;
-                        comp.produced = new int[recipeProto.Results.Length];
-                        for(int i = 0; i < old.Length && i < comp.produced.Length; i++) {
-                            comp.produced[i] = old[i];
-                        }
-                    }
+                    Array.Resize(ref comp.produced, recipeProto.Results.Length);
                 }
+
                 #endregion
             }
-            if(entr.Has_LabComponent) {//transcludes duck code from AssemblerComponent
+            if(entr.Has_LabComponent) {//transcludes the duck code from AssemblerComponent
                 #region LabComponent
+
                 ref var comp = ref entr.GetLive_LabComponent();
                 if(comp.matrixMode) {
                     var recipeProto = LDB.recipes.Select(comp.recipeId);
@@ -627,28 +617,13 @@ namespace Eirshy.DSP.Rythmn {
                     comp.productive = recipeProto.productive;
                     comp.requires = recipeProto.Items;
                     comp.requireCounts = recipeProto.ItemCounts;
-                    if(comp.served.Length != recipeProto.Items.Length) {
-                        var old = comp.served;
-                        comp.served = new int[recipeProto.Items.Length];
-                        for(int i = 0; i < old.Length && i < comp.served.Length; i++) {
-                            comp.served[i] = old[i];
-                        }
-                        old = comp.incServed;
-                        comp.incServed = new int[recipeProto.Items.Length];
-                        for(int i = 0; i < old.Length && i < comp.incServed.Length; i++) {
-                            comp.incServed[i] = old[i];
-                        }
-                    }
+                    Array.Resize(ref comp.served, recipeProto.Items.Length);
+                    Array.Resize(ref comp.incServed, recipeProto.Items.Length);
                     comp.products = recipeProto.Results;
                     comp.productCounts = recipeProto.ResultCounts;
-                    if(comp.produced.Length != recipeProto.Results.Length) {
-                        var old = comp.produced;
-                        comp.produced = new int[recipeProto.Results.Length];
-                        for(int i = 0; i < old.Length && i < comp.produced.Length; i++) {
-                            comp.produced[i] = old[i];
-                        }
-                    }
+                    Array.Resize(ref comp.produced, recipeProto.Results.Length);
                 }//nothing to do on other modes
+
                 #endregion
             }
             if(entr.Has_FractionatorComponent) {//scans for recipe by in then out, logs if not found
