@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 
 using BepInEx.Configuration;
 
-using Eirshy.DSP.ReBuffer.Enums;
-
 namespace Eirshy.DSP.ReBuffer {
     static class Config {
         const string HDR = nameof(ReBuffer);

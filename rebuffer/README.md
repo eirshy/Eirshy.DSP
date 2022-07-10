@@ -1,7 +1,7 @@
 # Re-Buffer
-Ever look at a smelter and think *"Why's this thing got 100 iron plates just sitting it it? I wish I could tell it to only keep like, 5."*?
+Ever look at a smelter and think *"Why's this thing got 100 iron plates just sitting it it? I wish I could tell it to only keep like, 5... or 500."*?
 
-Then this is the answer. ***Re*-Buffer** lets you re-define the buffer sizes on Assemblers, Chem Labs, *Re*-fineries, Particle Colliders, and *Re*-search labs- and possibly more in the future.
+Then this is the answer. ***Re*-Buffer** lets you *re*-define the buffer sizes on Assemblers, Chem Labs, *Re*-fineries, Particle Colliders, and *Re*-search labs- and possibly more in the future.
 
 It does this by *re*-placing the highly-efficient constants in the game's original code with values loaded from a config file- and then over-paying the performance cost by *re*-writing and *re*-optimizing all of the code around it. Over all, your game should actually run at least as fast, if not *faster* by using this mod. At least, until the devs get around to *re*-writing these sections themselves.
 
@@ -12,7 +12,6 @@ Note that if you want to be able to tweak Miner and Pump buffers, you'll want my
 - v0.1.4<br />Added triage component-disablers for in case I'm slow to update something. Updated with note about *VeinityProject*.
 - v0.1.3<br />Fixed integer rounding issues causing us to misregister how much jello we eat on research.
 - v0.1.2<br />Removed some on-further-consideration-unnecessary thread guards from non-collapsed labs.
-- v0.1.1<br />Fixed the readme and added the missing BepInEX dep.
 
 ## Mechanical changes compared to vanilla
 As a note, part of the speed gain is by allowing certain mechanical edge-cases to just happen, as well as changing certain behaviors. Notably...
