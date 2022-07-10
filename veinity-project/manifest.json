@@ -1,0 +1,9 @@
+﻿{
+  "name": "VeinityProject",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/eirshy/Eirshy.DSP",
+  "description": "Re-writes MinerComponent.InternalUpdate to play nice with multithreading and have some customizability.",
+  "dependencies": [
+   	"xiaoye97-BepInEx-5.4.17"
+  ]
+}
