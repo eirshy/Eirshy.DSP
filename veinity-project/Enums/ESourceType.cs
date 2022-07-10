@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace Eirshy.DSP.VeinityProject.Enums {
     enum ESourceType {
         _UNSET, 
-        Infinite, 
+        Infinite,
+        InfiniteDiminished,
         Diminishing,
         FiniteDepleting,
     }

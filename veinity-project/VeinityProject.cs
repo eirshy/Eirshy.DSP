@@ -14,7 +14,7 @@ namespace Eirshy.DSP.VeinityProject {
         public const string MODID = "VeinityProject";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.0.0.0";
+        public const string VERSION = "0.1.0.0";
         public const string NAME = "VeinityProject";
 
 
@@ -26,6 +26,8 @@ namespace Eirshy.DSP.VeinityProject {
         private void Awake() {
             Logs = Logger;
             Logger.LogMessage("VeinityProject powdering up!");
+            DSP.VeinityProject.Config.Load(Config);
+            MinerComponentPatcher.ApplyMe();
         }
 
     }
