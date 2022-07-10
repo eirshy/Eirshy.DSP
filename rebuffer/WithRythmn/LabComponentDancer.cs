@@ -45,9 +45,9 @@ namespace Eirshy.DSP.ReBuffer.WithRythmn {
         static int JelloPlateSize;
 
         public static void ApplyMe() {
-            InpMult = CFG.GetInp(ERecipeType.Research);
-            OupMult = CFG.GetOup(ERecipeType.Research);
-            JelloPlateSize =  JELLO_CALORIES * CFG.JelloAppetite;
+            InpMult = Config.GetInp(ERecipeType.Research);
+            OupMult = Config.GetOup(ERecipeType.Research);
+            JelloPlateSize =  JELLO_CALORIES * Config.JelloAppetite;
 
             //we need non-parallel by factory
             Rythmn.RythmnKit.AddLoad_PostVisitor(MoveToTheDimmsdaleSector);

@@ -17,9 +17,9 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         static int JelloPlateSize;
 
         public static void ApplyMe() {
-            InpMult = CFG.GetInp(ERecipeType.Research);
-            OupMult = CFG.GetOup(ERecipeType.Research);
-            JelloPlateSize = JELLO_CALORIES * CFG.JelloAppetite;
+            InpMult = Config.GetInp(ERecipeType.Research);
+            OupMult = Config.GetOup(ERecipeType.Research);
+            JelloPlateSize = JELLO_CALORIES * Config.JelloAppetite;
 
             ReBuffer.Harmony.PatchAll(typeof(LabComponentPatcher));
         }
@@ -115,7 +115,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool UpdateOutputToNext_inlineWillUp(ref LabComponent __instance, ref LabComponent next, int i) {
             //no locking needed, needs is immutable at this step if we don't mutate it, so if we require
-            //  needs to be met, by __inst and not-met by next, we have guaranteed safety thanks to sniffing
+            //  needs to be met by __inst and not-met by next, we have guaranteed safety thanks to sniffing
             //  a this-point-in-the-tick immutable aspect of the state
             return __instance.needs[i] == 0 && next.needs[i] > 0;
             //old hijack-for-lock based for matrixMode

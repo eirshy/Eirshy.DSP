@@ -6,7 +6,13 @@ using HarmonyLib;
 
 namespace Eirshy.DSP.ReBuffer.AnyBeat {
     static class AssemblerComponentPatcher {
-		public static void ApplyMe() => ReBuffer.Harmony.PatchAll(typeof(AssemblerComponentPatcher));
+		
+		
+		public static void ApplyMe() {
+			ReBuffer.Harmony.PatchAll(typeof(AssemblerComponentPatcher));
+		}
+
+
 
 		//SetRecipe doesn't need any additional cleanup, needs and incServed both get nuked already.
 		//[HarmonyPostfix]
@@ -18,7 +24,7 @@ namespace Eirshy.DSP.ReBuffer.AnyBeat {
 		static void UpdateNeeds(ref AssemblerComponent __instance, ref bool __runOriginal) {
 			if(!__runOriginal) return;
 			__runOriginal = false;
-			int mult = CFG.GetInp(__instance.recipeType);
+			int mult = Config.GetInp(__instance.recipeType);
             switch(__instance.requires.Length) {
 				case 6: UpdateNeeds_inline(ref __instance, 5, mult); goto case 5;
 				case 5: UpdateNeeds_inline(ref __instance, 4, mult); goto case 4;
@@ -46,7 +52,7 @@ namespace Eirshy.DSP.ReBuffer.AnyBeat {
 				__result = 0U;
 				return;
 			}
-			var buffm_oup = CFG.GetOup(__instance.recipeType);
+			var buffm_oup = Config.GetOup(__instance.recipeType);
 
 			//reorderd to skip a single jge, because why not, it's a free ops-1.
 

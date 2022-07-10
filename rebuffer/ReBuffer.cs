@@ -18,7 +18,7 @@ namespace Eirshy.DSP.ReBuffer {
         public const string MODID = "ReBuffer";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "0.1.3.0";
+        public const string VERSION = "0.1.4.0";
         public const string NAME = "ReBuffer";
 
         const string RYTHMN_GUID = ROOT + "Rythmn";
@@ -31,7 +31,7 @@ namespace Eirshy.DSP.ReBuffer {
         private void Awake() {
             Logs = Logger;
             Logger.LogMessage("ReBuffer Active");
-            CFG.Load(Config);
+            DSP.ReBuffer.Config.Load(Config);
             HookAnyBeat();
             if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(RYTHMN_GUID)) {
                 HookWithRythmn();
@@ -40,18 +40,28 @@ namespace Eirshy.DSP.ReBuffer {
             }
         }
 
+        public static EEnabledComponents Enabled { get; internal set; } = EEnabledComponents._NONE;
+        public static bool IsEnabled(EEnabledComponents component) => (Enabled & component) == component;
+
+        //the following is provided in case you got here via reflection
+        public static int ComponentsEnabled => (int)Enabled;
+        public static bool IsComponentEnabled(int component) => (ComponentsEnabled & component) == component;
+
 
         private void HookAnyBeat() {
-            AssemblerComponentPatcher.ApplyMe();
+            if(IsEnabled(EEnabledComponents.AssemblerComponent)) AssemblerComponentPatcher.ApplyMe();
         }
         private void HookNoRythmn() {
-            LabComponentPatcher.ApplyMe();
+            if(IsEnabled(EEnabledComponents.LabComponent)) LabComponentPatcher.ApplyMe();
         }
         private void HookWithRythmn() {
             Logs.LogMessage("Taking advantage of having Rythmn!");
-
-            if(CFG.CollapseLabTowers) LabComponentDancer.ApplyMe();
-            else LabComponentPatcher.ApplyMe();
+            if(IsEnabled(EEnabledComponents.LabComponent)) {
+                if(DSP.ReBuffer.Config.CollapseLabTowers) {
+                    Enabled |= EEnabledComponents.LabDancers;
+                    LabComponentDancer.ApplyMe();
+                } else LabComponentPatcher.ApplyMe();
+            }
         }
     }
 }
