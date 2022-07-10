@@ -20,7 +20,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.1.0.0";
+        public const string VERSION = "1.1.0.1";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";
@@ -43,18 +43,18 @@ namespace Eirshy.DSP.LazyOutposting {
 
             public static void Initialzie() {
                 if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(OTHERMOD_VEINITYPROJECT)) {
+                    Logs.LogMessage("Veinity Detected! Enabling Soft-Dep Tricks that use it!!");
                     _load_veinityProject();
                 }
             }
             private static void _load_veinityProject() {
-                OilMiners = GiveDwarvesBuckets;//if the mod's enabled 
+                OilMiners = GiveDwarvesBuckets;//if the mod's enabled we work.
             }
         }
 
         private void Awake() {
             Logs = Logger;
             Logger.LogMessage($"Lazy Outposting - For anywhere but Hoxxes IV!");
-            SoftDepTricks.Initialzie();
 
             //config
             const string HDR = nameof(LazyOutposting);
@@ -74,6 +74,7 @@ namespace Eirshy.DSP.LazyOutposting {
 
 
 
+            SoftDepTricks.Initialzie();
             if(EnableDwarvenCommute) DwarvenCommute.SetUp();
             if(EnableVaporCollection) Harmony.PatchAll(typeof(VaporCollection));
         }

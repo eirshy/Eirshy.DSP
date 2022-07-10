@@ -10,13 +10,11 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
         static MissionRotation Mission;
         public static void SetUp() {
-            if(LazyOutposting.SoftDepTricks.OilMiners) {
-                Mission = new MissionRotation(MissionRotation.EDwarvenKit.MineralOil);
-            } else if(LazyOutposting.SoftDepTricks.OceanMiners) {
+            if(LazyOutposting.SoftDepTricks.OceanMiners) {
                 Mission = new MissionRotation(MissionRotation.EDwarvenKit.MineralOilWater);
-            } else {
-                Mission = new MissionRotation(MissionRotation.EDwarvenKit.Mineral);
-            }
+            } else if(LazyOutposting.SoftDepTricks.OilMiners) {
+                Mission = new MissionRotation(MissionRotation.EDwarvenKit.MineralOil);
+            } else Mission = new MissionRotation(MissionRotation.EDwarvenKit.Mineral);
             LazyOutposting.Harmony.PatchAll(typeof(DwarvenCommute));
         }
 
