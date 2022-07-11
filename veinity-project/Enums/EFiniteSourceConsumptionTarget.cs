@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace Eirshy.DSP.VeinityProject.Enums {
     enum EFiniteSourceConsumptionTarget {
-        Cyclic, Lowest, Fullest, Random,
+        Cyclic, Lowest, Fullest,
     }
 }

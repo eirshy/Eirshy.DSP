@@ -281,17 +281,6 @@ namespace Eirshy.DSP.VeinityProject {
 										__instance.currentVeinIndex = ci;
 										break;
 									}
-									case EFiniteSourceConsumptionTarget.Random: {
-										var ci = __instance.currentVeinIndex % __instance.veinCount;
-										vpi = __instance.veins[ci];
-										for(int i = __instance.veinCount; i-- > 0;) {
-											ci = (ci + 1) % __instance.veinCount;
-											if(vpi <= 0) vpi = __instance.veins[ci];
-											else break;
-										}
-										__instance.currentVeinIndex = unchecked((int)(__instance.seed & 0x7FFFF_FFFF)) % vcnt;
-										break;
-									}
 									case EFiniteSourceConsumptionTarget.Lowest: {
 										__instance.currentVeinIndex = 0;
 										vpi = vpiLowest;

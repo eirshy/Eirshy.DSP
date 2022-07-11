@@ -73,10 +73,11 @@ namespace Eirshy.DSP.VeinityProject {
             if(Enum.TryParse<EFiniteSourceConsumptionTarget>(cf.Bind<string>(HDR_SOURCE_CONFIG
                 , nameof(FiniteSourceTargeting), $"{EFiniteSourceConsumptionTarget.Cyclic}"
                 , new ConfigDescription(
-                    $"How {ESourceType.FiniteDepleting} picks the vein to pull from. Default is the same as Vanilla." +
-                    $"\n{EFiniteSourceConsumptionTarget.Fullest} will result in the fastest average mining speed," +
-                    $" {EFiniteSourceConsumptionTarget.Lowest} will result in the slowest average mining speed," +
-                    $" {EFiniteSourceConsumptionTarget.Random} will tend to perform similar to {EFiniteSourceConsumptionTarget.Cyclic}"
+                    $"How {ESourceType.FiniteDepleting} picks the vein to deplete." +
+                    $" Default ({EFiniteSourceConsumptionTarget.Cyclic}) is the same as Vanilla:" +
+                    $"\nIterate over the whole list of veins each tick, depleting whichver is currently selected." +
+                    $"\nOther Options: \"{EFiniteSourceConsumptionTarget.Fullest}\" depletes the fullest first," +
+                    $" \"{EFiniteSourceConsumptionTarget.Lowest}\" depletes the most empty first."
                     , new AcceptableValueList<string>(acceptableValues: finiteDepleteTargets)
                 )
             ).Value, out var finiteDepleteTarget)) {
