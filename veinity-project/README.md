@@ -9,7 +9,7 @@ This and maybe more is all possible when you completely rewrite MinerComponent's
 That's right, if you don't touch our settings, we're actually a QoL optimization mod like *Re*-Buffer! In particular, planets with a *lot* of miners and oil pumps will see a... well, like, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
-
+- v0.1.1 Fixed some issues with the Readme.
 - v0.1.0 release
 
 ## Mechanical changes compared to vanilla
