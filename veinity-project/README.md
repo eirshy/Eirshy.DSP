@@ -6,14 +6,14 @@ Or maybe you just want that Texan fever dream where a single mkII miner can harv
 
 This and maybe more is all possible when you completely rewrite MinerComponent's internal update to support a more loose definition of everything- and stop locking the entire vein pool in the process. 
 
-That's right, if you don't touch our settings, we're actually a QoL optimization mod like ***Re-*Buffer**! In particular, planets with a *lot* of miners and oil pumps will see a... well, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
+That's right, if you don't touch our settings, we're actually a QoL optimization mod like *Re*-Buffer! In particular, planets with a *lot* of miners and oil pumps will see a... well, like, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
 
 - v0.1.0 release
 
 ## Mechanical changes compared to vanilla
-- ***Item Output ALWAYS pile up to 4 if available*** rather than batching to 
+- ***Item output ALWAYS piles up to 4 if available*** rather than batching to a tier 3 belt's speed.
 - ***Vein pruning is done the tick after a vein is emptied*** rather than only when the vein is selected as the target vein and found empty.
 - ***Vein count/amount speed contributions are calculated based on a snapshot of vein states during the tick*** rather than a forced-serialization for any shared veins.
 
