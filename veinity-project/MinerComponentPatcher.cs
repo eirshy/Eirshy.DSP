@@ -15,14 +15,12 @@ namespace Eirshy.DSP.VeinityProject {
 
     class MinerComponentPatcher {
 		const int ARBITRARY_LARGE_NUMBER = 500_000;
-
-		public static void ApplyMe(){
-            VeinityProject.Harmony.PatchAll(typeof(MinerComponentPatcher));
-		}
-
 		static void _transcludedDependencies() {
 			PlanetFactory pf = null;
 			MinerComponent mc = new MinerComponent();
+
+			_ = nameof(DiminishingMiningRateModifier);
+			pf.factorySystem.GameTick(0L, false);//the oil modifier calc to miningRate in this
 
 			_ = nameof(_safeAddFlagsToFactory_inline);
 			pf.AddMiningFlagUnsafe(EVeinType.None);
@@ -42,6 +40,19 @@ namespace Eirshy.DSP.VeinityProject {
 			mc.GetMinimumVeinAmount(pf, (VeinData[])null);
 		}
 
+		public static void ApplyMe(){
+            VeinityProject.Harmony.PatchAll(typeof(MinerComponentPatcher));
+		}
+
+
+		[HarmonyPostfix]
+		[HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
+		public static void Precalc() {
+			DiminishingMiningRateModifier = GameMain.data.gameDesc.resourceMultiplier * 0.40111667f;
+		}
+		static float DiminishingMiningRateModifier { get; set; }
+
+
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(MinerComponent), nameof(MinerComponent.SetPCState))]
 		public static void SetPCState(PowerConsumerComponent[] pcPool
@@ -53,7 +64,7 @@ namespace Eirshy.DSP.VeinityProject {
 			_DetermineState_inline(ref __instance);
 			pcPool[__instance.pcId].SetRequiredEnergy(
 				__instance.workstate > EWorkState.Idle//how vanilla does it
-				? _getupdDamper(ref __instance) * __instance.speed * __instance.speed / 100000000.0
+				? _getupdDamper(ref __instance) * __instance.speed * __instance.speed / 100_000_000.0
 				: 0
 			);
 		}
@@ -344,11 +355,12 @@ namespace Eirshy.DSP.VeinityProject {
 							#endregion
 							#region case ESourceType.Diminishing: { ... } break;
 							case ESourceType.Diminishing: {
-								if(miningRate > 0f && vmax > Config.DiminishLimit) {
+								var consRate = miningRate * DiminishingMiningRateModifier;
+								if(consRate > 0f && vmax > Config.DiminishLimit) {
 									int consume = 0;
 									var curSeed = __instance.seed;
 									for(int j = potential; j-- > 0;) {
-										if(_iu_cycleSeed_inline(ref curSeed, in miningRate)) consume++;
+										if(_iu_cycleSeed_inline(ref curSeed, in consRate)) consume++;
 									}
 									__instance.seed = curSeed;
 									if(consume > 0) {
