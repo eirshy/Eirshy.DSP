@@ -14,7 +14,7 @@ namespace Eirshy.DSP.VeinityProject {
         public const string MODID = "VeinityProject";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "0.1.2.0";
+        public const string VERSION = "0.1.3.0";
         public const string NAME = "VeinityProject";
 
 

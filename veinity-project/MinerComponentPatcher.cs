@@ -259,9 +259,9 @@ namespace Eirshy.DSP.VeinityProject {
 				if(vcnt > 0) {
 					//Time tick and mark as running
 					if(__instance.time <= __instance.period) {
-						__instance.time += __instance.time += (int)GetSingleTickTime_inline(
+						__instance.time += (int)GetSingleTickTime_inline(
 							source, vcnt, vtot, __instance.speed, miningSpeed, power, __instance.speedDamper
-						); ;
+						);
 						__result = 1U;
 					}
 					//Move from Source to Internal Buffer

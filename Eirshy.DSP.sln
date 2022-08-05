@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32228.343
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.Rythmn", "rythmn\Eirshy.DSP.Rythmn.csproj", "{1A61B06A-A422-4246-AFBD-6558E05E7CF7}"
 EndProject
@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.ReBuffer", "rebu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.StaticCompression", "static-compression\Eirshy.DSP.StaticCompression.csproj", "{23E19D4A-8233-4EF1-9B34-4421098D2D18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eirshy.DSP.LazyOutposting", "lazyoutposting\Eirshy.DSP.LazyOutposting.csproj", "{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.LazyOutposting", "lazyoutposting\Eirshy.DSP.LazyOutposting.csproj", "{5D0DDBC2-1C08-48CF-A8A6-7648AC315DE8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eirshy.DSP.VeinityProject", "veinity-project\Eirshy.DSP.VeinityProject.csproj", "{5E7F66B8-52D6-4FD4-9B23-A6AF75BF2CE3}"
 EndProject
