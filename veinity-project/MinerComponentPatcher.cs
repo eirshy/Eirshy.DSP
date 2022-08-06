@@ -102,11 +102,11 @@ namespace Eirshy.DSP.VeinityProject {
 				__instance.speedDamper = 1f;
             } else if(__instance.productCount > 0) {
 				//this is clunky but there's no other way to check if we have a station component
-				float rate50 = -2.45f * ( __instance.productCount / 50f ) + 2.45f;//exact from vanilla
+				float rate50 = 2.47f - 2.45f * ( __instance.productCount / 50f );
 				rate50 = rate50 > 1f ? 1f : rate50 < 0f ? 0f : rate50;
 				if(__instance.speedDamper == rate50) {
-					float rateNew = 2.45f * (1f - __instance.productCount / (float)Config.Buffer);
-					__instance.speedDamper = rateNew;
+					float rateNew = 2.47f - 2.45f * (__instance.productCount / (float)Config.Buffer);
+					__instance.speedDamper = rateNew > 1f ? 1f : rateNew;
 				}
 			}
 			return __instance.speedDamper;
