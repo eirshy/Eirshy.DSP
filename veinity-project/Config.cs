@@ -24,7 +24,7 @@ namespace Eirshy.DSP.VeinityProject {
             )).Value;
             if(Buffer < 1) Buffer = 1;
 
-            WaterPumpVeinCount = cf.Bind<int>(HDR, nameof(Buffer), 1, new ConfigDescription(
+            WaterPumpVeinCount = cf.Bind<int>(HDR, nameof(WaterPumpVeinCount), 1, new ConfigDescription(
                 "Number of \"veins\" to pretend Water Pumps are harvesting from." +
                 "\nValues below 1 will be treated as 1."
             )).Value;
