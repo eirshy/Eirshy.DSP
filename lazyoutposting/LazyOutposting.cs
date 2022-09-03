@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Reflection;
 
@@ -20,7 +22,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.1.0.1";
+        public const string VERSION = "1.2.0.0";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";
@@ -31,26 +33,20 @@ namespace Eirshy.DSP.LazyOutposting {
 
         static internal ManualLogSource Logs { get; private set; }
 
-        internal static bool EnableDwarvenCommute { get; private set; }
-        internal static bool EnableVaporCollection { get; private set; }
-        internal static bool GiveDwarvesBuckets { get; private set; }
+        internal static bool EnableVaporCollection { get; private set; } = true;
 
-        internal static bool VeinityProjectExists { get; private set; }
-
-        internal static class SoftDepTricks {
-            public static bool OilMiners { get; private set; } = false;
-            public static bool OceanMiners { get; private set; } = false;
-
-            public static void Initialzie() {
-                if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(OTHERMOD_VEINITYPROJECT)) {
-                    Logs.LogMessage("Veinity Detected! Enabling Soft-Dep Tricks that use it!!");
-                    _load_veinityProject();
-                }
-            }
-            private static void _load_veinityProject() {
-                OilMiners = GiveDwarvesBuckets;//if the mod's enabled we work.
-            }
+        internal static bool GiveDwarvesHaulers { get; private set; } = true;
+        static bool _GiveDwarvesBuckets = true;
+        internal static bool GiveDwarvesBuckets {
+            get => _GiveDwarvesBuckets && VeinityProjectExists.Value;
+            set => _GiveDwarvesBuckets = value;
         }
+        internal static bool GiveTechDwarvesLongPicks { get; private set; } = false;
+
+        internal static readonly Lazy<bool> VeinityProjectExists = new Lazy<bool>(
+            ()=>BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(OTHERMOD_VEINITYPROJECT)
+            , LazyThreadSafetyMode.PublicationOnly
+        );
 
         private void Awake() {
             Logs = Logger;
@@ -58,24 +54,73 @@ namespace Eirshy.DSP.LazyOutposting {
 
             //config
             const string HDR = nameof(LazyOutposting);
+            const string HDR_DWARVES = HDR + "." + nameof(DwarvenContract);
             const string REQ_OTHER_MOD = "Requires the mod VeinityProject, otherwise will be ignored.";
 
-            EnableDwarvenCommute = Config.Bind<bool>(HDR, nameof(EnableDwarvenCommute), true, new ConfigDescription(
-                "If we should enable planet-wide mining."
-            )).Value;
-            EnableVaporCollection = Config.Bind<bool>(HDR, nameof(EnableVaporCollection), true, new ConfigDescription(
+            //migrate legacy setting names
+            var configVer = Config.Bind<string>(HDR, "ConfigVersion", "0", new ConfigDescription(
+                "Internal value used to migrate settings."
+            ));
+            var doSettingsMigration = configVer.Value != VERSION;
+            if(doSettingsMigration) {
+                var legacyDesc = new ConfigDescription("Legacy setting name. Should be removed.");
+                var toDelete = new List<ConfigDefinition>();
+                ConfigEntry<string> legacyValue;
+                Dictionary<string,bool> readBool = new Dictionary<string, bool>(2){
+                    { "true", true },
+                    { "false", false },
+                };
+                int migrationLevel;
+                switch(configVer.Value) {
+                    default: migrationLevel = 0; break;
+                    case "1.2.0.0": migrationLevel = 1; break;
+                }
+
+                if(migrationLevel < 1) {
+                    const string key = "EnableDwarvenCommute";
+                    legacyValue = Config.Bind<string>(HDR, key, "", legacyDesc);
+                    if(readBool.TryGetValue(legacyValue.Value.ToLower(), out var val)) {
+                        GiveDwarvesHaulers = val;
+                    }
+                    toDelete.Add(legacyValue.Definition);
+                }
+                if(migrationLevel < 1) {
+                    const string key = "GiveDwarvesBuckets";
+                    legacyValue = Config.Bind<string>(HDR, key, "", legacyDesc);
+                    if(readBool.TryGetValue(legacyValue.Value.ToLower(), out var val)) {
+                        GiveDwarvesBuckets = val;
+                    }
+                    toDelete.Add(legacyValue.Definition);
+                }
+
+                configVer.Value = VERSION;
+                Logs.LogWarning($"Removed: ${toDelete.Select(Config.Remove).Where(b => b).Count()}/{toDelete.Count}");
+            }
+
+            //Non-Dwarf Settings
+            EnableVaporCollection = Config.Bind<bool>(HDR, nameof(EnableVaporCollection), EnableVaporCollection, new ConfigDescription(
                 "If we should enable ocean collection regardless of said ocean being accessible."
             )).Value;
 
-            GiveDwarvesBuckets = Config.Bind<bool>(HDR, nameof(GiveDwarvesBuckets), true, new ConfigDescription(
+
+            //Dwarf Settings
+            GiveDwarvesHaulers = Config.Bind<bool>(HDR_DWARVES, nameof(GiveDwarvesHaulers), GiveDwarvesHaulers, new ConfigDescription(
+                "If we should enable planet-wide mining. Usable by both regular miners and mk2 miners."
+            )).Value;
+            GiveDwarvesBuckets = Config.Bind<bool>(HDR_DWARVES, nameof(GiveDwarvesBuckets), GiveDwarvesBuckets, new ConfigDescription(
                 $"{REQ_OTHER_MOD}" +
-                $"\nIf we should allow miners to collect oil."
+                $"\nIf we should allow miners to collect oil." +
+                $" Note that only Tech Dwarves (Mk2 Miners (Miner Collectors)) can perform this action without Haulers."
+            )).Value;
+            GiveTechDwarvesLongPicks = Config.Bind<bool>(HDR_DWARVES, nameof(GiveTechDwarvesLongPicks), GiveTechDwarvesLongPicks, new ConfigDescription(
+                "If we should change the way Mk2 Miners (Miner Collectors) pick veins to be a little less strict." +
+                "\nIf set, still requires *a* vein to be directly under the machine's plate, but will grab any vein" +
+                " of the same type within the scan radius of the center of the plate, rather than strictly under the plate."
             )).Value;
 
 
-
-            SoftDepTricks.Initialzie();
-            if(EnableDwarvenCommute) DwarvenCommute.SetUp();
+            if(doSettingsMigration) Config.Save();
+            if(GiveDwarvesHaulers) DwarvenContract.SetUp();
             if(EnableVaporCollection) Harmony.PatchAll(typeof(VaporCollection));
         }
 
