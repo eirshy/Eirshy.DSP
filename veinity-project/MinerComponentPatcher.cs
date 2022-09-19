@@ -15,6 +15,7 @@ namespace Eirshy.DSP.VeinityProject {
 
     class MinerComponentPatcher {
 		const int ARBITRARY_LARGE_NUMBER = 500_000;
+		const int MAX_VANILLA_PROTO_ID = 3000;
 		static void _transcludedDependencies() {
 			PlanetFactory pf = null;
 			MinerComponent mc = new MinerComponent();
@@ -119,6 +120,7 @@ namespace Eirshy.DSP.VeinityProject {
 			, ref MinerComponent __instance, ref bool __runOriginal, ref uint __result
 		) {
 			if(!__runOriginal) return;
+			if(factory.entityPool[__instance.entityId].protoId > MAX_VANILLA_PROTO_ID) return; //Ignore miners from other mods
 			__runOriginal = false;
 			__result = 0U;
 			if(power < 0.1f) return;
