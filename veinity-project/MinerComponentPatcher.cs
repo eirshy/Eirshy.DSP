@@ -15,6 +15,7 @@ namespace Eirshy.DSP.VeinityProject {
 
     class MinerComponentPatcher {
 		const int ARBITRARY_LARGE_NUMBER = 500_000;
+
 		static void _transcludedDependencies() {
 			PlanetFactory pf = null;
 			MinerComponent mc = new MinerComponent();
@@ -40,9 +41,19 @@ namespace Eirshy.DSP.VeinityProject {
 			mc.GetMinimumVeinAmount(pf, (VeinData[])null);
 		}
 
-		public static void ApplyMe(){
+
+		public static void SetUp(){
             VeinityProject.Harmony.PatchAll(typeof(MinerComponentPatcher));
 		}
+
+
+		internal static int MkRemapKey(int ProtoID, int OreProdID) => ProtoID << 16 ^ OreProdID;
+		internal static void AddRemapFor(int proto, int oreProto, int makesProto, int orePer) {
+			if(Remap == null) Remap = new Dictionary<int, (int to, int ratio)>();
+			Remap.Add(MkRemapKey(proto, oreProto), (makesProto, orePer));
+        }
+		internal static Dictionary<int, (int to, int ratio)> Remap = null;
+
 
 
 		[HarmonyPostfix]
@@ -456,12 +467,23 @@ namespace Eirshy.DSP.VeinityProject {
 		static void _iu_export_inline(ref MinerComponent mc, ref PlanetFactory factory) {
 			if(mc.productCount > 0 && mc.insertTarget > 0) {
 				//Just always pile up to 4. Avoids needing to calc a delta.
-				
-				byte toOut = (byte)((mc.productCount < 4) ? mc.productCount : 4);
-				int outputted = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
-				mc.productCount -= outputted;
-				//mk2 Miners' stations auto-pull extra, so no need to repeat to get more than 4 outputted.
-				//  Unless we've got some sort of weird custom belt that can move more than 4 in a tick...
+				if(Remap != null) {
+					//compat catch
+					int pid = factory.entityPool[mc.entityId].protoId;
+					if(Remap.TryGetValue(MkRemapKey(pid, mc.productId), out var rm2)) {
+						int adjusted = mc.productCount / rm2.ratio;
+						byte toOut = (byte)((adjusted < 4) ? adjusted : 4);
+						int outputted = factory.InsertInto(mc.insertTarget, 0, rm2.to, toOut, 0, out _);
+						mc.productCount -= outputted * rm2.ratio;
+					}
+                } else {
+					byte toOut = (byte)((mc.productCount < 4) ? mc.productCount : 4);
+					int outputted = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
+					mc.productCount -= outputted;
+					//mk2 Miners' stations auto-pull extra, so no need to repeat to get more than 4 outputted.
+					//  Unless we've got some sort of weird custom belt that can move more than 4 in a tick...
+
+				}
 			}
 			//Don't think this is actually *necessary*, so don't do it.
 			//if(__instance.productCount == 0 && __instance.type == EMinerType.Vein) __instance.productId = 0;

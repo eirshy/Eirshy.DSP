@@ -9,9 +9,9 @@ This and maybe more is all possible when you completely rewrite MinerComponent's
 That's right, if you don't touch our settings, we're actually a QoL optimization mod like *Re*-Buffer! In particular, planets with a *lot* of miners and oil pumps will see a... well, like, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
+- v0.1.6 Triage tier fix of compat with JinxOAO's SmleterMiner
 - v0.1.5 Fixed the config file loading buffer size as the water pump vein count.
 - v0.1.4 Fixed a bug with the Damper recalc
-- v0.1.3 Fixed a bug where mining work time was multiplied by 2 every tick (woops)
 
 ## Mechanical changes compared to vanilla
 - ***Item output ALWAYS piles up to 4 if available*** rather than batching to a tier 3 belt's speed.
