@@ -25,7 +25,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string VERSION = "1.2.0.0";
         public const string NAME = "Lazy Outposting";
 
-        internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";
+        internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";//unused atm
         internal const string OTHERMOD_VEINITYPROJECT = ROOT + "VeinityProject";
 
         internal static Harmony Harmony => _harmony.Value;
