@@ -13,8 +13,9 @@ using Eirshy.DSP.VeinityProject.Enums;
 
 namespace Eirshy.DSP.VeinityProject {
 
-    class MinerComponentPatcher {
+    class VeinityPatcher {
 		const int ARBITRARY_LARGE_NUMBER = 500_000;
+		static long logmax = 5;
 
 		static void _transcludedDependencies() {
 			PlanetFactory pf = null;
@@ -43,7 +44,7 @@ namespace Eirshy.DSP.VeinityProject {
 
 
 		public static void SetUp(){
-            VeinityProject.Harmony.PatchAll(typeof(MinerComponentPatcher));
+            VeinityProject.Harmony.PatchAll(typeof(VeinityPatcher));
 		}
 
 
@@ -465,29 +466,35 @@ namespace Eirshy.DSP.VeinityProject {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void _iu_export_inline(ref MinerComponent mc, ref PlanetFactory factory) {
-			if(mc.productCount > 0 && mc.insertTarget > 0) {
-				//Just always pile up to 4. Avoids needing to calc a delta.
-				if(Remap != null) {
-					//compat catch
-					int pid = factory.entityPool[mc.entityId].protoId;
-					if(Remap.TryGetValue(MkRemapKey(pid, mc.productId), out var rm2)) {
+			if(mc.productCount > 0) {
+                if(mc.insertTarget > 0) {
+					#region Direct belt output on mk1 miners
+					//Just always pile up to 4. Avoids needing to calc a delta.
+					byte toOut;
+					int outputted;
+					if(Remap != null) {
+						//compat catch
+						int pid = factory.entityPool[mc.entityId].protoId;
+						if(!Remap.TryGetValue(MkRemapKey(pid, mc.productId), out var rm2)) {
+							rm2 = (mc.productId, 1);
+						}
 						int adjusted = mc.productCount / rm2.ratio;
-						byte toOut = (byte)((adjusted < 4) ? adjusted : 4);
-						int outputted = factory.InsertInto(mc.insertTarget, 0, rm2.to, toOut, 0, out _);
-						mc.productCount -= outputted * rm2.ratio;
+						toOut = (byte)((adjusted < 4) ? adjusted : 4);
+						if(toOut > 0) {
+							outputted = factory.InsertInto(mc.insertTarget, 0, rm2.to, toOut, 0, out _);
+							mc.productCount -= outputted * rm2.ratio;
+						}
+					} else {
+						toOut = (byte)((mc.productCount < 4) ? mc.productCount : 4);
+						outputted = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
+						mc.productCount -= outputted;
 					}
-                } else {
-					byte toOut = (byte)((mc.productCount < 4) ? mc.productCount : 4);
-					int outputted = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
-					mc.productCount -= outputted;
-					//mk2 Miners' stations auto-pull extra, so no need to repeat to get more than 4 outputted.
-					//  Unless we've got some sort of weird custom belt that can move more than 4 in a tick...
-
+					#endregion
 				}
 			}
-			//Don't think this is actually *necessary*, so don't do it.
-			//if(__instance.productCount == 0 && __instance.type == EMinerType.Vein) __instance.productId = 0;
-		}
+            //Don't think this is actually *necessary*, so don't do it.
+            //if(__instance.productCount == 0 && __instance.type == EMinerType.Vein) __instance.productId = 0;
+        }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void _iu_prune_inline(ref MinerComponent mc, in int vcnt) {
 			if(vcnt < mc.veinCount && vcnt >= 0) {

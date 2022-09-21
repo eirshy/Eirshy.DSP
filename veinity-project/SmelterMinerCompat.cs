@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.Reflection.Emit;
 
 using HarmonyLib;
 
@@ -16,10 +18,18 @@ namespace Eirshy.DSP.VeinityProject {
         const int MapOBase = 9449;
         const int SplitOffset = 20;
 
-
+        
         public static void SetUp() {
-            if(!VeinityProject.SmelterMiner_Exists.Value) return;
-            VeinityProject.Harmony.PatchAll(typeof(SmelterMinerCompat));
+            BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(VeinityProject.GUID_SmelterMiner, out var bpi);
+            if(bpi is null) return;
+            var smt = bpi.Instance.GetType();
+            const BindingFlags flags = BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic;
+            var mc_iu = typeof(MinerComponent).GetMethod(nameof(MinerComponent.InternalUpdate));
+            var mc_uvcp = typeof(StationComponent).GetMethod(nameof(StationComponent.UpdateVeinCollection));
+            if(mc_iu is not null) VeinityProject.Harmony.Unpatch(mc_iu, smt.GetMethod("InternalUpdatePatch", flags));
+            if(mc_uvcp is not null) VeinityProject.Harmony.Unpatch(mc_uvcp, smt.GetMethod("UpdateVeinCollectionPatch", flags));
+            
+            //_ = VeinityProject.Harmony.Patch(smt.GetMethod("UpdateVeinCollectionPatch", flags), new HarmonyMethod(disable));
 
             //todo: make this reflection bs instead of manual
             var bases = new (int proto, int ore, int smelt, int per)[]{
@@ -61,20 +71,15 @@ namespace Eirshy.DSP.VeinityProject {
             var withAdv = bases.Concat(bases.Select(b => (proto: b.proto + SplitOffset, b.ore, b.smelt, b.per)));
             
             foreach(var maps in withAdv) {
-                MinerComponentPatcher.AddRemapFor(maps.proto, maps.ore, maps.smelt, maps.per);
+                VeinityPatcher.AddRemapFor(maps.proto, maps.ore, maps.smelt, maps.per);
             }
+            VeinityProject.Logs.LogInfo($"Remap Count: {VeinityPatcher.Remap.Count}");
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch("SmelterMiner", "InternalUpdatePatch")]
-        static void DissableOriginal_IUP(ref bool __runOriginal) {
-            __runOriginal = false;
+        static IEnumerable<CodeInstruction> Disable() {
+            yield return new CodeInstruction(OpCodes.Ldc_I4_1);
+            yield return new CodeInstruction(OpCodes.Ret);
         }
-        [HarmonyPrefix]
-        [HarmonyPatch("SmelterMiner", "UpdateVeinCollectionPatch")]
-        static void DissableOriginal_UVCP(ref bool __runOriginal) {
-            __runOriginal = false;
-        }
-        
+
     }
 }
