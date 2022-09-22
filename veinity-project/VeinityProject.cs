@@ -15,7 +15,7 @@ namespace Eirshy.DSP.VeinityProject {
         public const string MODID = "VeinityProject";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "0.1.6.0";
+        public const string VERSION = "0.2.0.0";
         public const string NAME = "VeinityProject";
 
         internal const string GUID_SmelterMiner = "Gnimaerd.DSP.plugin.SmelterMiner";
@@ -26,12 +26,21 @@ namespace Eirshy.DSP.VeinityProject {
         static internal ManualLogSource Logs { get; private set; }
 
         private void Awake() {
-            
             Logs = Logger;
             Logger.LogMessage("VeinityProject powdering up!");
             DSP.VeinityProject.Config.Load(Config);
-            SmelterMinerCompat.SetUp();
+            SmelterMinerCompat.SetUpAwake();
             VeinityPatcher.SetUp();
+
+            Harmony.PatchAll(typeof(VeinityProject));
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(VFPreload), nameof(VFPreload.InvokeOnLoadWorkEnded))]
+        public static void SetupLate() {
+            SmelterMinerCompat.SetUpLate();
+            //---
+            Helpers.OreRemap.Bake();
         }
     }
 }

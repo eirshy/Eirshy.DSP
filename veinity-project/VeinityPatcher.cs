@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reflection.Emit;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 using HarmonyLib;
 
 using Eirshy.DSP.VeinityProject.Enums;
+using Eirshy.DSP.VeinityProject.Helpers;
 
 namespace Eirshy.DSP.VeinityProject {
 
@@ -48,13 +50,16 @@ namespace Eirshy.DSP.VeinityProject {
 		}
 
 
-		internal static int MkRemapKey(int ProtoID, int OreProdID) => ProtoID << 16 ^ OreProdID;
-		internal static void AddRemapFor(int proto, int oreProto, int makesProto, int orePer) {
-			if(Remap == null) Remap = new Dictionary<int, (int to, int ratio)>();
-			Remap.Add(MkRemapKey(proto, oreProto), (makesProto, orePer));
+		//Since we're handling the original behavior entirely internally, just bulldoze the whole
+		//  method. This should *technically* be more performant than a prefix __runOriginal -> false
+		//  in the event that nobody else has patches on it.
+        [HarmonyTranspiler]
+		[HarmonyPatch(typeof(StationComponent), nameof(StationComponent.UpdateVeinCollection))]
+		static IEnumerable<CodeInstruction> DisableIL() {
+			yield return new CodeInstruction(OpCodes.Ret);
         }
-		internal static Dictionary<int, (int to, int ratio)> Remap = null;
-
+        //[HarmonyPrefix]
+		static bool DisableRO() => false;
 
 
 		[HarmonyPostfix]
@@ -148,7 +153,7 @@ namespace Eirshy.DSP.VeinityProject {
 				#region Scan VeinArray (or fake it)
 
 				switch(__instance.type) {
-					default: //fail gracefully- we literally don't know what to do for this.
+					default: //fail vaguely gracefully- we literally don't know what to do for this.
 						__runOriginal = true;
 						return;
 					case EMinerType.None: return;//"this isn't actually a minercomponent".
@@ -402,7 +407,7 @@ namespace Eirshy.DSP.VeinityProject {
 					}
 				}
 			}
-			_iu_export_inline(ref __instance, ref factory);
+			_iu_export_inline(ref __instance, ref factory, ref productRegister);
 			_iu_prune_inline(ref __instance, in vcnt);
 		}
 
@@ -464,37 +469,81 @@ namespace Eirshy.DSP.VeinityProject {
 			return cur - to;
 		}
 
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void _iu_export_inline(ref MinerComponent mc, ref PlanetFactory factory) {
+		static void _iu_export_inline(ref MinerComponent mc, ref PlanetFactory factory, ref int[] prodReg) {
 			if(mc.productCount > 0) {
-                if(mc.insertTarget > 0) {
-					#region Direct belt output on mk1 miners
-					//Just always pile up to 4. Avoids needing to calc a delta.
+				int moved;
+				if(mc.insertTarget > 0) {
+					#region Direct belt output for non-Station miners
 					byte toOut;
-					int outputted;
-					if(Remap != null) {
-						//compat catch
-						int pid = factory.entityPool[mc.entityId].protoId;
-						if(!Remap.TryGetValue(MkRemapKey(pid, mc.productId), out var rm2)) {
-							rm2 = (mc.productId, 1);
-						}
-						int adjusted = mc.productCount / rm2.ratio;
-						toOut = (byte)((adjusted < 4) ? adjusted : 4);
-						if(toOut > 0) {
-							outputted = factory.InsertInto(mc.insertTarget, 0, rm2.to, toOut, 0, out _);
-							mc.productCount -= outputted * rm2.ratio;
+					if(OreRemap.HasRemap) {
+						var pid = factory.entityPool[mc.entityId].protoId;
+						var orm = OreRemap.Get(pid, mc.productId);
+						if(orm.IsDefault) {
+							toOut = (byte)((mc.productCount < 4) ? mc.productCount : 4);
+							moved = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
+							mc.productCount -= moved;
+						} else {
+							int adjusted = orm.Ore2Prod(mc.productCount);
+							toOut = (byte)((adjusted < 4) ? adjusted : 4);
+							if(toOut > 0) {
+								var consReg = GameMain.statistics.production.factoryStatPool[factory.index].consumeRegister;
+								moved = factory.InsertInto(mc.insertTarget, 0, orm.ProductID, toOut, 0, out _);
+								var cons = orm.Prod2Ore(moved);
+								mc.productCount -= cons;
+								_ = Interlocked.Add(ref consReg[mc.productId], cons);
+								_ = Interlocked.Add(ref prodReg[orm.ProductID], moved);
+							}
 						}
 					} else {
 						toOut = (byte)((mc.productCount < 4) ? mc.productCount : 4);
-						outputted = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
-						mc.productCount -= outputted;
+						moved = factory.InsertInto(mc.insertTarget, 0, mc.productId, toOut, 0, out _);
+						mc.productCount -= moved;
 					}
-					#endregion
-				}
-			}
+                    #endregion
+                } else {
+					ref var ent = ref factory.entityPool[mc.entityId];
+                    #region StationID-based st-ore-age
+                    if(ent.stationId > 0) {
+						//Original forces index 0, we'll do the same till we have reason to not.
+						ref var storeage = ref factory.transport.stationPool[ent.stationId].storage[0];
+						int maxMove = storeage.max - storeage.count;
+						if(maxMove <= 0) return;//busywait shortcut
+						if(OreRemap.HasRemap) {
+							var orm = OreRemap.Get(ent.protoId, mc.productId);
+                            if(orm.IsDefault) {
+								moved = mc.productCount > maxMove ? maxMove : mc.productCount;
+								mc.productCount -= moved;
+								_ = Interlocked.Add(ref storeage.count, moved);
+								storeage.itemId = mc.productId;
+                            } else {
+								var consReg = GameMain.statistics.production.factoryStatPool[factory.index].consumeRegister;
+
+								int adjusted = orm.Ore2Prod(mc.productCount);
+								moved = adjusted > maxMove ? maxMove : adjusted;
+								int cons = orm.Prod2Ore(moved);
+								mc.productCount -= cons;
+								_ = Interlocked.Add(ref storeage.count, moved);
+								_ = Interlocked.Add(ref consReg[mc.productId], cons);
+								_ = Interlocked.Add(ref prodReg[orm.ProductID], moved);
+								storeage.itemId = orm.ProductID;
+							}
+						} else {
+							moved = mc.productCount > maxMove ? maxMove : mc.productCount;
+							mc.productCount -= moved;
+							_ = Interlocked.Add(ref storeage.count, moved);
+							storeage.itemId = mc.productId;
+						}
+					}
+                    #endregion
+                }
+            }
             //Don't think this is actually *necessary*, so don't do it.
             //if(__instance.productCount == 0 && __instance.type == EMinerType.Vein) __instance.productId = 0;
         }
+
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void _iu_prune_inline(ref MinerComponent mc, in int vcnt) {
 			if(vcnt < mc.veinCount && vcnt >= 0) {
@@ -514,6 +563,7 @@ namespace Eirshy.DSP.VeinityProject {
 				}
 			}
 		}
+
 
 
 
