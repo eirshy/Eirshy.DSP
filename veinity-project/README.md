@@ -9,12 +9,12 @@ This and maybe more is all possible when you completely rewrite MinerComponent's
 That's right, if you don't touch our settings, we're actually a QoL optimization mod like *Re*-Buffer! In particular, planets with a *lot* of miners and oil pumps will see a... well, like, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
+- v0.2.2 Adjusted SmelterMiner compat to be closer to original
 - v0.2.1 More-Verbose Readme
 - v0.2.0 
   - Actual support for JinxOAO's SmelterMiner
   - Theoretical support for similar "mining x produce y" concepts
   - Integrated Push-To-Station into our InternalUpdate code
-- v0.1.6 Triage tier fix of compat with JinxOAO's SmleterMiner
 
 ## Mechanical changes compared to vanilla
 - ***Item output ALWAYS piles up to 4 if available*** rather than batching to a tier 3 belt's speed.
@@ -25,8 +25,9 @@ That's right, if you don't touch our settings, we're actually a QoL optimization
 ## Compatibility Notes
 - ***SmelterMiner** by JinxOAO* is fully supported.
   - Uses current smelting recipe ratios.
-  - Type C supports all of Kimberlite, Frac-Si, Fire Ice, and Spin-Cry "smelting"
-  - Type A/B/C mk2 all support Oil refining if LazyOutposting enables mk2 Miners to "mine" oil.
+  - Type A supports all normal and Kimberlite smelting
+  - Type B supports all alternate and Kimberlite smelting
+  - Type C supports Frac-Si, Fire Ice, Oil, and Spin-Cry "smelting"
 
 ## Known Issues
 - ***Miner UI does not "update" to an N/s value when in Diminishing Mode*** It's roughly **25000** vein value per 1/s output. At some point I'll dig into how to change the UI for it. That is what's needed to hit v1.
