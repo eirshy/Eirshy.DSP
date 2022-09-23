@@ -9,20 +9,24 @@ This and maybe more is all possible when you completely rewrite MinerComponent's
 That's right, if you don't touch our settings, we're actually a QoL optimization mod like *Re*-Buffer! In particular, planets with a *lot* of miners and oil pumps will see a... well, like, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
+- v0.2.1 More-Verbose Readme
 - v0.2.0 
   - Actual support for JinxOAO's SmelterMiner
   - Theoretical support for similar "mining x produce y" concepts
   - Integrated Push-To-Station into our InternalUpdate code
 - v0.1.6 Triage tier fix of compat with JinxOAO's SmleterMiner
-- v0.1.5 Fixed the config file loading buffer size as the water pump vein count.
 
 ## Mechanical changes compared to vanilla
 - ***Item output ALWAYS piles up to 4 if available*** rather than batching to a tier 3 belt's speed.
 - ***Vein pruning is done the tick after a vein is emptied*** rather than only when the vein is selected as the target vein and found empty.
-- ***Vein count/amount speed contributions are calculated based on a snapshot of vein states during the tick*** rather than a forced-serialization for any shared veins.
+- ***Vein count/amount speed contributions are calculated based on a rolling snapshot*** rather than a forced-serialization for any shared veins.
+- ***StationComponent is pushed to by MiningComponent*** rather than pulling from later in the tick.
 
 ## Compatibility Notes
-- JinxOAO's SmelterMiner is fully supported. Additionally, if LazyOutpositng is installed and set to allow mk2 miners to harvest Oil, all of A, B, and C mk2 types will be able to convert Oil to Refined Oil.
+- ***SmelterMiner** by JinxOAO* is fully supported.
+  - Uses current smelting recipe ratios.
+  - Type C supports all of Kimberlite, Frac-Si, Fire Ice, and Spin-Cry "smelting"
+  - Type A/B/C mk2 all support Oil refining if LazyOutposting enables mk2 Miners to "mine" oil.
 
 ## Known Issues
 - ***Miner UI does not "update" to an N/s value when in Diminishing Mode*** It's roughly **25000** vein value per 1/s output. At some point I'll dig into how to change the UI for it. That is what's needed to hit v1.
