@@ -5,12 +5,18 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using HarmonyLib;
+using System.Reflection;
 
 namespace Eirshy.DSP.LazyOutposting.Components {
     static class VaporCollection {
+        public static void SetUp() {
+            LazyOutposting.Harmony.PatchAll(typeof(VaporCollection));
+        }
+
         readonly static ConcurrentDictionary<int, PrefabDesc> Forgeries = new ConcurrentDictionary<int, PrefabDesc>();
         static PrefabDesc GetForgery(BuildPreview pv) => Forgeries.GetOrAdd(pv.desc.modelIndex, ForgePrefabDesc);
         static PrefabDesc GetOriginal(BuildPreview pv) => LDB.models.Select(pv.desc.modelIndex).prefabDesc;
+
 
         static PrefabDesc ForgePrefabDesc(int id) {
             var ret = LazyOutposting.ClonePrefab(LDB.models.Select(id).prefabDesc);
@@ -29,7 +35,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                 //Don't need anything special here, pumps are automatic so long as they can be placed.
 
                 //forge the prefabDesc to claim we're not a vein miner, and let our postfix know to undo it.
-                if(__state == null) __state = new List<BuildPreview>(__instance.buildPreviews.Count);
+                __state ??= new List<BuildPreview>(__instance.buildPreviews.Count);
                 pv.desc = GetForgery(pv);
                 __state.Add(pv);
             }
@@ -46,7 +52,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                 //Don't need anything special here, pumps are automatic so long as they can be placed.
 
                 //forge the prefabDesc to claim we're not a vein miner, and let our postfix know to undo it.
-                if(__state == null) __state = new List<BuildPreview>(__instance.bpPool.Length / 2);
+                __state ??= new List<BuildPreview>(__instance.bpPool.Length / 2);
                 pv.desc = GetForgery(pv);
                 __state.Add(pv);
             }

@@ -22,7 +22,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.2.0.0";
+        public const string VERSION = "1.2.1";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";//unused atm
@@ -66,7 +66,7 @@ namespace Eirshy.DSP.LazyOutposting {
                 var legacyDesc = new ConfigDescription("Legacy setting name. Should be removed.");
                 var toDelete = new List<ConfigDefinition>();
                 ConfigEntry<string> legacyValue;
-                Dictionary<string,bool> readBool = new Dictionary<string, bool>(2){
+                var readBool = new Dictionary<string, bool>(2){
                     { "true", true },
                     { "false", false },
                 };
@@ -117,11 +117,11 @@ namespace Eirshy.DSP.LazyOutposting {
                 "\nIf set, still requires *a* vein to be directly under the machine's plate, but will grab any vein" +
                 " of the same type within the scan radius of the center of the plate, rather than strictly under the plate."
             )).Value;
-
+            var anyDwarves = GiveDwarvesBuckets || GiveDwarvesHaulers || GiveTechDwarvesLongPicks;
 
             if(doSettingsMigration) Config.Save();
-            if(GiveDwarvesHaulers) DwarvenContract.SetUp();
-            if(EnableVaporCollection) Harmony.PatchAll(typeof(VaporCollection));
+            if(anyDwarves) DwarvenContract.SetUp();
+            if(EnableVaporCollection) VaporCollection.SetUp();
         }
 
         /// <summary>

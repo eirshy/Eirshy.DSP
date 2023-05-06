@@ -49,21 +49,25 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             public readonly bool HasBuckets;
             public readonly bool HasLongPicks;
 
-            readonly EVeinType[] _Veins;
-            public EVeinType CommuteVein => _Veins[LazyOutposting.OnKey % _Veins.Length];
+            readonly EVeinType[] _hauling;
+            public EVeinType CommuteVein => _hauling[LazyOutposting.OnKey % _hauling.Length];
 
             readonly bool[] _dwarfTargets;
             public bool CanTarget(EVeinType veinType) => _dwarfTargets[(int)veinType];
 
             public DwarfMission(EGear withGear) {
                 Equipment = withGear;
-                var allEVT = ((EVeinType[])Enum.GetValues(typeof(EVeinType)));
+                var allEVT = (EVeinType[])Enum.GetValues(typeof(EVeinType));
+                var stdBan = new HashSet<EVeinType>(3){
+                    EVeinType.None,
+                    EVeinType.Max,
+                    EVeinType.Oil,
+                };
                 var validTargets = allEVT
-                    .Where(evt => evt != EVeinType.None)
-                    .Where(evt => evt != EVeinType.Max)
-                    .Where(evt => evt != EVeinType.Oil)
+                    .Where(evt => !stdBan.Contains(evt))
                     .ToList()
                 ;
+
                 //simple tech
                 #region handle Buckets
 
@@ -76,37 +80,15 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                 HasLongPicks = Equipment.HasFlag(EGear.LongPicks);
 
                 #endregion
+
                 //complicated tech
-                #region handle Haulers
+                #region handle Haulers (assumes ValidTargets is finished)
+
                 if(Equipment.HasFlag(EGear.Haulers)) {
-                    var travelsTo = new List<EVeinType>(16) { EVeinType.None };
-                    //1 None, 6 basic, 1 liquid, 7 rare, 1 ocean (not available yet)
-
-                    //basic
-                    travelsTo.Add(EVeinType.Iron);
-                    travelsTo.Add(EVeinType.Copper);
-                    travelsTo.Add(EVeinType.Silicium);
-                    travelsTo.Add(EVeinType.Titanium);
-                    travelsTo.Add(EVeinType.Stone);
-                    travelsTo.Add(EVeinType.Coal);
-
-                    //liquids
-                    if(HasBuckets) travelsTo.Add(EVeinType.Oil);
-
-                    //rares
-                    travelsTo.Add(EVeinType.Fireice);
-                    travelsTo.Add(EVeinType.Diamond); // Kimberlite Ore
-                    travelsTo.Add(EVeinType.Fractal); // Fractal Silicon
-                    travelsTo.Add(EVeinType.Crysrub); // Organic Crystals
-                    travelsTo.Add(EVeinType.Grat); // Optical Grating Crystal
-                    travelsTo.Add(EVeinType.Bamboo); // Spiniform Stalagmite Crystal
-                    travelsTo.Add(EVeinType.Mag); // Unipolar Magnet
-
-                    _Veins = travelsTo?.ToArray();
-                } else _Veins = new[] { EVeinType.None };
+                    _hauling = validTargets.Prepend(EVeinType.None).ToArray();
+                } else _hauling = new[] { EVeinType.None };
 
                 #endregion
-
                 //array-style dictionary
                 _dwarfTargets = new bool[(int)allEVT.Max()];
                 for(int vti = validTargets.Count; vti-- > 0;) {
