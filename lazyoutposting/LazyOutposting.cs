@@ -13,6 +13,7 @@ using UnityEngine;
 using HarmonyLib;
 
 using Eirshy.DSP.LazyOutposting.Components;
+using System.Reflection.Emit;
 
 namespace Eirshy.DSP.LazyOutposting {
 
@@ -22,7 +23,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.2.1";
+        public const string VERSION = "1.3.0";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";//unused atm
@@ -41,7 +42,8 @@ namespace Eirshy.DSP.LazyOutposting {
             get => _GiveDwarvesBuckets && VeinityProjectExists.Value;
             set => _GiveDwarvesBuckets = value;
         }
-        internal static bool GiveTechDwarvesLongPicks { get; private set; } = false;
+        internal static bool GiveDwarvesShovels { get; private set; } = false;
+        internal static bool GiveDwarvesLongPicks { get; private set; } = false;
 
         internal static readonly Lazy<bool> VeinityProjectExists = new Lazy<bool>(
             ()=>BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(OTHERMOD_VEINITYPROJECT)
@@ -74,6 +76,8 @@ namespace Eirshy.DSP.LazyOutposting {
                 switch(configVer.Value) {
                     default: migrationLevel = 0; break;
                     case "1.2.0.0": migrationLevel = 1; break;
+                    case "1.2.1": migrationLevel = 1; break;
+                    case "1.3.0": migrationLevel = 2; break;
                 }
 
                 if(migrationLevel < 1) {
@@ -89,6 +93,15 @@ namespace Eirshy.DSP.LazyOutposting {
                     legacyValue = Config.Bind<string>(HDR, key, "", legacyDesc);
                     if(readBool.TryGetValue(legacyValue.Value.ToLower(), out var val)) {
                         GiveDwarvesBuckets = val;
+                    }
+                    toDelete.Add(legacyValue.Definition);
+                }
+
+                if(migrationLevel < 2) {
+                    const string key = "GiveTechDwarvesLongPicks";
+                    legacyValue = Config.Bind<string>(HDR, key, "", legacyDesc);
+                    if(readBool.TryGetValue(legacyValue.Value.ToLower(), out var val)) {
+                        GiveDwarvesLongPicks = val;
                     }
                     toDelete.Add(legacyValue.Definition);
                 }
@@ -112,12 +125,17 @@ namespace Eirshy.DSP.LazyOutposting {
                 $"\nIf we should allow miners to collect oil." +
                 $" Note that only Tech Dwarves (Mk2 Miners (Miner Collectors)) can perform this action without Haulers."
             )).Value;
-            GiveTechDwarvesLongPicks = Config.Bind<bool>(HDR_DWARVES, nameof(GiveTechDwarvesLongPicks), GiveTechDwarvesLongPicks, new ConfigDescription(
-                "If we should change the way Mk2 Miners (Miner Collectors) pick veins to be a little less strict." +
-                "\nIf set, still requires *a* vein to be directly under the machine's plate, but will grab any vein" +
-                " of the same type within the scan radius of the center of the plate, rather than strictly under the plate."
+            GiveDwarvesLongPicks = Config.Bind<bool>(HDR_DWARVES, nameof(GiveDwarvesLongPicks), GiveDwarvesLongPicks, new ConfigDescription(
+                "If we should change the way mines pick veins to be \"fuzzy\"." +
+                "\nIf set, still requires *a* vein to be in the machine's target zone, but will grab any vein of the same" +
+                " type within the scanning zone. Additionally, enables Shovels, as testing height in this mode is difficult."
             )).Value;
-            var anyDwarves = GiveDwarvesBuckets || GiveDwarvesHaulers || GiveTechDwarvesLongPicks;
+            GiveDwarvesShovels = Config.Bind<bool>(HDR_DWARVES, nameof(GiveDwarvesShovels), GiveDwarvesShovels, new ConfigDescription(
+                "If we should ignore vein height (ie, whether the vein's been burried)." +
+                "\nNote that this is implied by Long Picks, due to a difficulty in implementing Long Picks without Shovels."
+            )).Value;
+            
+            var anyDwarves = GiveDwarvesBuckets || GiveDwarvesHaulers || GiveDwarvesLongPicks || GiveDwarvesShovels;
 
             if(doSettingsMigration) Config.Save();
             if(anyDwarves) DwarvenContract.SetUp();
@@ -148,6 +166,16 @@ namespace Eirshy.DSP.LazyOutposting {
                 fi.SetValue(ret, fi.GetValue(from));
             }
             return ret;
+        }
+    }
+
+    internal static class Extensions {
+        /// <summary>
+        /// Convenience; replaces the opcode and the operand on this instruction
+        /// </summary>
+        public static void Reop(this CodeInstruction ci, OpCode op, object operand = null) {
+            ci.opcode = op;
+            ci.operand = operand;
         }
     }
 }

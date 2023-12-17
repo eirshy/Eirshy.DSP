@@ -9,14 +9,13 @@ All options are toggleable, so you can freely decide just how lazy you want to b
 
 ## Changes
 
+- v1.3.0 DarkFog Update; Added Shovels
 - v1.2.1 Fixed dwarven contracts only working if Haulers are enabled, minor future-proofing
 - v1.2.0 Changed miner settings to "gear", migrated Buckets/Haulers, added LongPicks
-- v1.1.0 Added support for planet oil mining via *VeinityProject*.
-- v1.0.1 fixed nullref error on some bp pastings
 
 ## Controls
 - Press *PageUp* to cycle forwards in the hauler resource list.
 - Press *PageDown* to cycle *backwards* in the hauler resource list.
 
 ## Future...
-Possibly support for miner blueprint forcing for advanced miners, as well as possible lazy oil 
+Possibly support for miner blueprint forcing for advanced miners, as well as more proper lazy-oil and better lazy-ocean.
