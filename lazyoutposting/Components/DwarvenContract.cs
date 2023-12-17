@@ -279,7 +279,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             if(Mission.HasShovels || !Mission.HaulersNotActive) {
                 //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
                 miner.veins = new int[prebuild.paramCount];
-                Array.Copy(prebuild.parameters, 0, miner.veins, 0, prebuild.paramCount);
+                Array.Copy(prebuild.parameters ?? Array.Empty<int>(), 0, miner.veins, 0, prebuild.paramCount);
                 miner.veinCount = prebuild.paramCount;
                 //miner.ArrangeVeinArray();//we exact-sized it, no need
             } else {
