@@ -9,6 +9,7 @@ All options are toggleable, so you can freely decide just how lazy you want to b
 
 ## Changes
 
+- v1.3.1 Fixed Haulers secretly requiring Shovels
 - v1.3.0 DarkFog Update; Added Shovels
 - v1.2.1 Fixed dwarven contracts only working if Haulers are enabled, minor future-proofing
 - v1.2.0 Changed miner settings to "gear", migrated Buckets/Haulers, added LongPicks

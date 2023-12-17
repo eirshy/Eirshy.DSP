@@ -64,6 +64,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
             readonly EVeinType[] _hauling;
             public EVeinType CommuteVein => _hauling[LazyOutposting.OnKey % _hauling.Length];
+            public bool HaulersNotActive => CommuteVein == EVeinType.None;
 
             readonly bool[] _dwarfTargets;
             public bool CanTarget(EVeinType veinType) => _dwarfTargets[(int)veinType];
@@ -275,7 +276,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             ref var miner = ref __instance.factorySystem.minerPool[minerId];
             ref var sign = ref __instance.entitySignPool[entityId];
 
-            if(Mission.HasShovels) {
+            if(Mission.HasShovels || !Mission.HaulersNotActive) {
                 //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
                 miner.veins = new int[prebuild.paramCount];
                 Array.Copy(prebuild.parameters, 0, miner.veins, 0, prebuild.paramCount);
