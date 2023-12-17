@@ -276,7 +276,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             ref var miner = ref __instance.factorySystem.minerPool[minerId];
             ref var sign = ref __instance.entitySignPool[entityId];
 
-            if(Mission.HasShovels || !Mission.HaulersNotActive) {
+            if(Mission.HasShovels || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein)) {
                 //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
                 miner.veins = new int[prebuild.paramCount];
                 Array.Copy(prebuild.parameters ?? Array.Empty<int>(), 0, miner.veins, 0, prebuild.paramCount);
