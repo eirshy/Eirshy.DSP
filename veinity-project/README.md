@@ -9,8 +9,8 @@ This and maybe more is all possible when you completely rewrite MinerComponent's
 That's right, if you don't touch our settings, we're actually a QoL optimization mod like *Re*-Buffer! In particular, planets with a *lot* of miners and oil pumps will see a... well, like, 0.05ms increase. But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
+- v0.2.4 DarkFog update; Swapped out a magic number for a source-reference.
 - v0.2.3 Added guard so VFPreloader running twice doesn't error
-- v0.2.2 Adjusted SmelterMiner compat to be closer to original
 - v0.2.0 
   - Actual support for JinxOAO's SmelterMiner
   - Theoretical support for similar "mining x produce y" concepts

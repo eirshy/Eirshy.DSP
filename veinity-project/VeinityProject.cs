@@ -15,13 +15,13 @@ namespace Eirshy.DSP.VeinityProject {
         public const string MODID = "VeinityProject";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "0.2.3.0";
+        public const string VERSION = "0.2.4";
         public const string NAME = "VeinityProject";
 
         internal const string GUID_SmelterMiner = "Gnimaerd.DSP.plugin.SmelterMiner";
 
         internal static Harmony Harmony => _harmony.Value;
-        readonly static Lazy<Harmony> _harmony = new Lazy<Harmony>(() => new Harmony(GUID));
+        readonly static Lazy<Harmony> _harmony = new(() => new Harmony(GUID));
 
         static internal ManualLogSource Logs { get; private set; }
 

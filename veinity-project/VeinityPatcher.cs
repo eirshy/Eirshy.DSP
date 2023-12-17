@@ -17,14 +17,10 @@ namespace Eirshy.DSP.VeinityProject {
 
     class VeinityPatcher {
 		const int ARBITRARY_LARGE_NUMBER = 500_000;
-		static long logmax = 5;
 
 		static void _transcludedDependencies() {
 			PlanetFactory pf = null;
 			MinerComponent mc = new MinerComponent();
-
-			_ = nameof(DiminishingMiningRateModifier);
-			pf.factorySystem.GameTick(0L, false);//the oil modifier calc to miningRate in this
 
 			_ = nameof(_safeAddFlagsToFactory_inline);
 			pf.AddMiningFlagUnsafe(EVeinType.None);
@@ -65,8 +61,8 @@ namespace Eirshy.DSP.VeinityProject {
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
 		public static void Precalc() {
-			DiminishingMiningRateModifier = GameMain.data.gameDesc.resourceMultiplier * 0.40111667f;
-		}
+			DiminishingMiningRateModifier = GameMain.data.gameDesc.resourceMultiplier * MinerComponent.kOilAmountInvMultiplier;
+        }
 		static float DiminishingMiningRateModifier { get; set; }
 
 
@@ -128,6 +124,8 @@ namespace Eirshy.DSP.VeinityProject {
 			}
 			return __instance.speedDamper;
 		}
+
+
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(MinerComponent), nameof(MinerComponent.InternalUpdate))]
@@ -289,7 +287,7 @@ namespace Eirshy.DSP.VeinityProject {
 							#region case ESourceType.Infinite: { ... } break;
 							case ESourceType.Infinite: {
 								__instance.productCount += potential;
-								Interlocked.Add(ref productRegister[prodID], potential);
+                                _ = Interlocked.Add(ref productRegister[prodID], potential);
 								__instance.time -= __instance.period * potential;
 								break;
 							}
@@ -342,7 +340,7 @@ namespace Eirshy.DSP.VeinityProject {
 										if(consume > 0) {//skip reducing if nothing to reduce
 											int groupIndex = vtarg.groupIndex;
 											//don't update min-vein, we'll do that next pass.
-											Interlocked.Add(ref factory.veinGroups[groupIndex].amount, -consume);
+											_ = Interlocked.Add(ref factory.veinGroups[groupIndex].amount, -consume);
 											_safeVeinAnim_largest_inline(ref factory.veinAnimPool[vpi]
 												, vtarg.amount >= 20000 ? 0f : (1f - (float)vtarg.amount * 5E-05f)
 											);
@@ -410,6 +408,7 @@ namespace Eirshy.DSP.VeinityProject {
 			_iu_export_inline(ref __instance, ref factory, ref productRegister);
 			_iu_prune_inline(ref __instance, in vcnt);
 		}
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float GetSingleTickTime_inline(in ESourceType source
@@ -565,8 +564,6 @@ namespace Eirshy.DSP.VeinityProject {
 		}
 
 
-
-
 		/// <summary>
 		/// keeps largest
 		/// </summary>
@@ -581,7 +578,6 @@ namespace Eirshy.DSP.VeinityProject {
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SuppressMessage("Member Access", "Publicizer001:Accessing a member that was not originally public", Justification = "Interlocked")]
         static void _safeAddFlagsToFactory_inline(ref PlanetFactory factory, in EVeinType addVeinType) {
 			int flagToSet = 1 << (int)addVeinType;
 			int cur;
