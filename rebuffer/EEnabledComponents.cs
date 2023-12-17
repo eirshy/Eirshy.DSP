@@ -15,16 +15,20 @@ namespace Eirshy.DSP.ReBuffer {
         /// <summary>
         /// Overwrites: UpdateNeeds, InternalUpdate
         /// </summary>
-        AssemblerComponent = 1 >> 00,
+        AssemblerComponent = 1 << 00,
 
         /// <summary>
         /// Overwrites: UpdateOutputToNext, UpdateNeedsAssemble, InternalUpdateAssemble, UpdateNeedsResearch, InternalUpdateResearch
         /// </summary>
-        LabComponent = 1 >> 01,
+        LabComponent = 1 << 01,
         /// <summary>
         /// Includes: UpdateOutputToNext, UpdateNeedsAssemble, InternalUpdateAssemble, UpdateNeedsResearch, InternalUpdateResearch
         /// </summary>
-        LabDancers = LabComponent & 1 >> 02,
+        LabDancers = LabComponent & 1 << 02,
 
+        /// <summary>
+        /// Includes: GameTick_Gamma
+        /// </summary>
+        PowerGenerators = 1 << 03,
     }
 }

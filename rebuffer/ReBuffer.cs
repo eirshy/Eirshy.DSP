@@ -18,7 +18,7 @@ namespace Eirshy.DSP.ReBuffer {
         public const string MODID = "ReBuffer";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "0.1.4.1";
+        public const string VERSION = "0.2.0";
         public const string NAME = "ReBuffer";
 
         const string RYTHMN_GUID = ROOT + "Rythmn";
@@ -57,10 +57,13 @@ namespace Eirshy.DSP.ReBuffer {
         private void HookWithRythmn() {
             Logs.LogMessage("Taking advantage of having Rythmn!");
             if(IsEnabled(EEnabledComponents.LabComponent)) {
-                if(DSP.ReBuffer.Config.CollapseLabTowers) {
-                    Enabled |= EEnabledComponents.LabDancers;
-                    LabComponentDancer.ApplyMe();
-                } else LabComponentPatcher.ApplyMe();
+                LabComponentPatcher.ApplyMe();
+                if(false) {//disabled outright for now, thread safety was backwards lol
+                    if(DSP.ReBuffer.Config.CollapseLabTowers) {
+                        Enabled |= EEnabledComponents.LabDancers;
+                        LabComponentDancer.ApplyMe();
+                    } else LabComponentPatcher.ApplyMe();
+                }
             }
         }
     }

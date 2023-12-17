@@ -335,7 +335,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
         static void InternalUpdateResearch(
-            float power, float speed, int[] consumeRegister, ref TechState ts, ref int techHashedThisFrame, ref long uMatrixPoint, ref long hashRegister
+            float power, float research_speed, int[] consumeRegister, ref TechState ts, ref int techHashedThisFrame, ref long uMatrixPoint, ref long hashRegister
             , ref LabComponent __instance, ref bool __runOriginal, ref uint __result
         ) {
             if(!__runOriginal) return;
@@ -345,7 +345,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
                 __result = 0U;
                 return;
             }
-            int hashPotential = (int)(speed + 2f);
+            int hashPotential = (int)(research_speed + 2f);
             //exit on fail, so no need to switch-waterfall these
             if(InternalUpdateResearch_inlineCheckPoints(ref __instance, 0, ref hashPotential)
                 || InternalUpdateResearch_inlineCheckPoints(ref __instance, 1, ref hashPotential)
@@ -360,7 +360,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             }
             __instance.replicating = true;
 
-            var hashSpeed = ((speed < (float)hashPotential) ? speed : ((float)hashPotential));
+            var hashSpeed = ((research_speed < (float)hashPotential) ? research_speed : ((float)hashPotential));
             long hashRemain = ts.hashNeeded - ts.hashUploaded;
             var curBytes = __instance.hashBytes + (int)(power * 10000f * hashSpeed + 0.5f);
             var hashUp = MIN3(curBytes / 10000L, hashRemain, hashPotential);
