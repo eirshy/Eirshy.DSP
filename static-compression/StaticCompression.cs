@@ -20,7 +20,7 @@ namespace Eirshy.DSP.StaticCompression {
         const string CUSTOM_BUFFERS_GUID = ROOT + "ReBuffer";
 
         internal static Harmony Harmony => _harmony.Value;
-        readonly static Lazy<Harmony> _harmony = new Lazy<Harmony>(() => new Harmony(GUID));
+        readonly static Lazy<Harmony> _harmony = new(() => new Harmony(GUID));
 
 
         private void Awake() {

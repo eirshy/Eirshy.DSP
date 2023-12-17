@@ -119,7 +119,7 @@ namespace Eirshy.DSP.Rythmn {
         public static IEnumerable<EntityRef> GetEntityRefs(PlanetFactory factory) {
             if(factory is null) return Enumerable.Empty<EntityRef>();
             return factory.entityPool
-                .Where(ed=>ed.notNull)
+                .Where(ed => ed.id != 0)
                 .Select(ed => new EntityRef(factory, ed.id))
             ;
         }
@@ -131,7 +131,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's beltId does not point to the null BeltComponent
         /// </summary>
-        public bool Has_BeltComponent => Entity.beltId != EntityData.Null.beltId;
+        public bool Has_BeltComponent => Entity.beltId != 0;
         /// <summary>
         /// Whether our BeltComponent in Factory matches our Entity.
         /// </summary>
@@ -164,7 +164,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's splitterId does not point to the null SplitterComponent
         /// </summary>
-        public bool Has_SplitterComponent => Entity.splitterId != EntityData.Null.splitterId;
+        public bool Has_SplitterComponent => Entity.splitterId != 0;
         /// <summary>
         /// Whether our SplitterComponent in Factory matches our Entity.
         /// </summary>
@@ -197,7 +197,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's monitorId does not point to the null MonitorComponent
         /// </summary>
-        public bool Has_MonitorComponent => Entity.monitorId != EntityData.Null.monitorId;
+        public bool Has_MonitorComponent => Entity.monitorId != 0;
         /// <summary>
         /// Whether our MonitorComponent in Factory matches our Entity.
         /// </summary>
@@ -230,7 +230,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's spraycoaterId does not point to the null SpraycoaterComponent
         /// </summary>
-        public bool Has_SpraycoaterComponent => Entity.spraycoaterId != EntityData.Null.spraycoaterId;
+        public bool Has_SpraycoaterComponent => Entity.spraycoaterId != 0;
         /// <summary>
         /// Whether our SpraycoaterComponent in Factory matches our Entity.
         /// </summary>
@@ -263,7 +263,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's pilerId does not point to the null PilerComponent
         /// </summary>
-        public bool Has_PilerComponent => Entity.pilerId != EntityData.Null.pilerId;
+        public bool Has_PilerComponent => Entity.pilerId != 0;
         /// <summary>
         /// Whether our PilerComponent in Factory matches our Entity.
         /// </summary>
@@ -296,7 +296,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's speakerId does not point to the null SpeakerComponent
         /// </summary>
-        public bool Has_SpeakerComponent => Entity.speakerId != EntityData.Null.speakerId;
+        public bool Has_SpeakerComponent => Entity.speakerId != 0;
         /// <summary>
         /// Whether our SpeakerComponent in Factory matches our Entity.
         /// </summary>
@@ -329,7 +329,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's storageId does not point to the null StorageComponent
         /// </summary>
-        public bool Has_StorageComponent => Entity.storageId != EntityData.Null.storageId;
+        public bool Has_StorageComponent => Entity.storageId != 0;
         /// <summary>
         /// Whether our StorageComponent in Factory matches our Entity.
         /// </summary>
@@ -362,7 +362,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's tankId does not point to the null TankComponent
         /// </summary>
-        public bool Has_TankComponent => Entity.tankId != EntityData.Null.tankId;
+        public bool Has_TankComponent => Entity.tankId != 0;
         /// <summary>
         /// Whether our TankComponent in Factory matches our Entity.
         /// </summary>
@@ -395,7 +395,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's minerId does not point to the null MinerComponent
         /// </summary>
-        public bool Has_MinerComponent => Entity.minerId != EntityData.Null.minerId;
+        public bool Has_MinerComponent => Entity.minerId != 0;
         /// <summary>
         /// Whether our MinerComponent in Factory matches our Entity.
         /// </summary>
@@ -428,7 +428,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's inserterId does not point to the null InserterComponent
         /// </summary>
-        public bool Has_InserterComponent => Entity.inserterId != EntityData.Null.inserterId;
+        public bool Has_InserterComponent => Entity.inserterId != 0;
         /// <summary>
         /// Whether our InserterComponent in Factory matches our Entity.
         /// </summary>
@@ -461,7 +461,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's assemblerId does not point to the null AssemblerComponent
         /// </summary>
-        public bool Has_AssemblerComponent => Entity.assemblerId != EntityData.Null.assemblerId;
+        public bool Has_AssemblerComponent => Entity.assemblerId != 0;
         /// <summary>
         /// Whether our AssemblerComponent in Factory matches our Entity.
         /// </summary>
@@ -494,7 +494,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's fractionatorId does not point to the null FractionatorComponent
         /// </summary>
-        public bool Has_FractionatorComponent => Entity.fractionatorId != EntityData.Null.fractionatorId;
+        public bool Has_FractionatorComponent => Entity.fractionatorId != 0;
         /// <summary>
         /// Whether our FractionatorComponent in Factory matches our Entity.
         /// </summary>
@@ -527,7 +527,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's ejectorId does not point to the null EjectorComponent
         /// </summary>
-        public bool Has_EjectorComponent => Entity.ejectorId != EntityData.Null.ejectorId;
+        public bool Has_EjectorComponent => Entity.ejectorId != 0;
         /// <summary>
         /// Whether our EjectorComponent in Factory matches our Entity.
         /// </summary>
@@ -560,7 +560,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's siloId does not point to the null SiloComponent
         /// </summary>
-        public bool Has_SiloComponent => Entity.siloId != EntityData.Null.siloId;
+        public bool Has_SiloComponent => Entity.siloId != 0;
         /// <summary>
         /// Whether our SiloComponent in Factory matches our Entity.
         /// </summary>
@@ -593,7 +593,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's labId does not point to the null LabComponent
         /// </summary>
-        public bool Has_LabComponent => Entity.labId != EntityData.Null.labId;
+        public bool Has_LabComponent => Entity.labId != 0;
         /// <summary>
         /// Whether our LabComponent in Factory matches our Entity.
         /// </summary>
@@ -626,7 +626,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's stationId does not point to the null StationComponent
         /// </summary>
-        public bool Has_StationComponent => Entity.stationId != EntityData.Null.stationId;
+        public bool Has_StationComponent => Entity.stationId != 0;
         /// <summary>
         /// Whether our StationComponent in Factory matches our Entity.
         /// </summary>
@@ -659,7 +659,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's powerGenId does not point to the null PowerGeneratorComponent
         /// </summary>
-        public bool Has_PowerGeneratorComponent => Entity.powerGenId != EntityData.Null.powerGenId;
+        public bool Has_PowerGeneratorComponent => Entity.powerGenId != 0;
         /// <summary>
         /// Whether our PowerGeneratorComponent in Factory matches our Entity.
         /// </summary>
@@ -692,7 +692,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's powerNodeId does not point to the null PowerNodeComponent
         /// </summary>
-        public bool Has_PowerNodeComponent => Entity.powerNodeId != EntityData.Null.powerNodeId;
+        public bool Has_PowerNodeComponent => Entity.powerNodeId != 0;
         /// <summary>
         /// Whether our PowerNodeComponent in Factory matches our Entity.
         /// </summary>
@@ -725,7 +725,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's powerConId does not point to the null PowerConsumerComponent
         /// </summary>
-        public bool Has_PowerConsumerComponent => Entity.powerConId != EntityData.Null.powerConId;
+        public bool Has_PowerConsumerComponent => Entity.powerConId != 0;
         /// <summary>
         /// Whether our PowerConsumerComponent in Factory matches our Entity.
         /// </summary>
@@ -758,7 +758,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's powerAccId does not point to the null PowerAccumulatorComponent
         /// </summary>
-        public bool Has_PowerAccumulatorComponent => Entity.powerAccId != EntityData.Null.powerAccId;
+        public bool Has_PowerAccumulatorComponent => Entity.powerAccId != 0;
         /// <summary>
         /// Whether our PowerAccumulatorComponent in Factory matches our Entity.
         /// </summary>
@@ -791,7 +791,7 @@ namespace Eirshy.DSP.Rythmn {
         /// <summary>
         /// True if our Entity's powerExcId does not point to the null PowerExchangerComponent
         /// </summary>
-        public bool Has_PowerExchangerComponent => Entity.powerExcId != EntityData.Null.powerExcId;
+        public bool Has_PowerExchangerComponent => Entity.powerExcId != 0;
         /// <summary>
         /// Whether our PowerExchangerComponent in Factory matches our Entity.
         /// </summary>
@@ -827,12 +827,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's beltId does not point to the null BeltComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_BeltComponent(in EntityData entity) => entity.beltId != EntityData.Null.beltId;
+        public static bool Uses_BeltComponent(in EntityData entity) => entity.beltId != 0;
         /// <summary>
         /// True if the entity's beltId does not point to the null BeltComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_BeltComponent(EntityData entity) => entity.beltId != EntityData.Null.beltId;
+        public static bool Uses_BeltComponent(EntityData entity) => entity.beltId != 0;
         /// <summary>
         /// True if the entity's BeltComponent in the factory matches the entity.
         /// </summary>
@@ -882,12 +882,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's splitterId does not point to the null SplitterComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_SplitterComponent(in EntityData entity) => entity.splitterId != EntityData.Null.splitterId;
+        public static bool Uses_SplitterComponent(in EntityData entity) => entity.splitterId != 0;
         /// <summary>
         /// True if the entity's splitterId does not point to the null SplitterComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_SplitterComponent(EntityData entity) => entity.splitterId != EntityData.Null.splitterId;
+        public static bool Uses_SplitterComponent(EntityData entity) => entity.splitterId != 0;
         /// <summary>
         /// True if the entity's SplitterComponent in the factory matches the entity.
         /// </summary>
@@ -937,12 +937,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's monitorId does not point to the null MonitorComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_MonitorComponent(in EntityData entity) => entity.monitorId != EntityData.Null.monitorId;
+        public static bool Uses_MonitorComponent(in EntityData entity) => entity.monitorId != 0;
         /// <summary>
         /// True if the entity's monitorId does not point to the null MonitorComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_MonitorComponent(EntityData entity) => entity.monitorId != EntityData.Null.monitorId;
+        public static bool Uses_MonitorComponent(EntityData entity) => entity.monitorId != 0;
         /// <summary>
         /// True if the entity's MonitorComponent in the factory matches the entity.
         /// </summary>
@@ -992,12 +992,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's spraycoaterId does not point to the null SpraycoaterComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_SpraycoaterComponent(in EntityData entity) => entity.spraycoaterId != EntityData.Null.spraycoaterId;
+        public static bool Uses_SpraycoaterComponent(in EntityData entity) => entity.spraycoaterId != 0;
         /// <summary>
         /// True if the entity's spraycoaterId does not point to the null SpraycoaterComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_SpraycoaterComponent(EntityData entity) => entity.spraycoaterId != EntityData.Null.spraycoaterId;
+        public static bool Uses_SpraycoaterComponent(EntityData entity) => entity.spraycoaterId != 0;
         /// <summary>
         /// True if the entity's SpraycoaterComponent in the factory matches the entity.
         /// </summary>
@@ -1047,12 +1047,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's pilerId does not point to the null PilerComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_PilerComponent(in EntityData entity) => entity.pilerId != EntityData.Null.pilerId;
+        public static bool Uses_PilerComponent(in EntityData entity) => entity.pilerId != 0;
         /// <summary>
         /// True if the entity's pilerId does not point to the null PilerComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_PilerComponent(EntityData entity) => entity.pilerId != EntityData.Null.pilerId;
+        public static bool Uses_PilerComponent(EntityData entity) => entity.pilerId != 0;
         /// <summary>
         /// True if the entity's PilerComponent in the factory matches the entity.
         /// </summary>
@@ -1102,12 +1102,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's speakerId does not point to the null SpeakerComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_SpeakerComponent(in EntityData entity) => entity.speakerId != EntityData.Null.speakerId;
+        public static bool Uses_SpeakerComponent(in EntityData entity) => entity.speakerId != 0;
         /// <summary>
         /// True if the entity's speakerId does not point to the null SpeakerComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_SpeakerComponent(EntityData entity) => entity.speakerId != EntityData.Null.speakerId;
+        public static bool Uses_SpeakerComponent(EntityData entity) => entity.speakerId != 0;
         /// <summary>
         /// True if the entity's SpeakerComponent in the factory matches the entity.
         /// </summary>
@@ -1157,12 +1157,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's storageId does not point to the null StorageComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_StorageComponent(in EntityData entity) => entity.storageId != EntityData.Null.storageId;
+        public static bool Uses_StorageComponent(in EntityData entity) => entity.storageId != 0;
         /// <summary>
         /// True if the entity's storageId does not point to the null StorageComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_StorageComponent(EntityData entity) => entity.storageId != EntityData.Null.storageId;
+        public static bool Uses_StorageComponent(EntityData entity) => entity.storageId != 0;
         /// <summary>
         /// True if the entity's StorageComponent in the factory matches the entity.
         /// </summary>
@@ -1212,12 +1212,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's tankId does not point to the null TankComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_TankComponent(in EntityData entity) => entity.tankId != EntityData.Null.tankId;
+        public static bool Uses_TankComponent(in EntityData entity) => entity.tankId != 0;
         /// <summary>
         /// True if the entity's tankId does not point to the null TankComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_TankComponent(EntityData entity) => entity.tankId != EntityData.Null.tankId;
+        public static bool Uses_TankComponent(EntityData entity) => entity.tankId != 0;
         /// <summary>
         /// True if the entity's TankComponent in the factory matches the entity.
         /// </summary>
@@ -1267,12 +1267,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's minerId does not point to the null MinerComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_MinerComponent(in EntityData entity) => entity.minerId != EntityData.Null.minerId;
+        public static bool Uses_MinerComponent(in EntityData entity) => entity.minerId != 0;
         /// <summary>
         /// True if the entity's minerId does not point to the null MinerComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_MinerComponent(EntityData entity) => entity.minerId != EntityData.Null.minerId;
+        public static bool Uses_MinerComponent(EntityData entity) => entity.minerId != 0;
         /// <summary>
         /// True if the entity's MinerComponent in the factory matches the entity.
         /// </summary>
@@ -1322,12 +1322,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's inserterId does not point to the null InserterComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_InserterComponent(in EntityData entity) => entity.inserterId != EntityData.Null.inserterId;
+        public static bool Uses_InserterComponent(in EntityData entity) => entity.inserterId != 0;
         /// <summary>
         /// True if the entity's inserterId does not point to the null InserterComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_InserterComponent(EntityData entity) => entity.inserterId != EntityData.Null.inserterId;
+        public static bool Uses_InserterComponent(EntityData entity) => entity.inserterId != 0;
         /// <summary>
         /// True if the entity's InserterComponent in the factory matches the entity.
         /// </summary>
@@ -1377,12 +1377,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's assemblerId does not point to the null AssemblerComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_AssemblerComponent(in EntityData entity) => entity.assemblerId != EntityData.Null.assemblerId;
+        public static bool Uses_AssemblerComponent(in EntityData entity) => entity.assemblerId != 0;
         /// <summary>
         /// True if the entity's assemblerId does not point to the null AssemblerComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_AssemblerComponent(EntityData entity) => entity.assemblerId != EntityData.Null.assemblerId;
+        public static bool Uses_AssemblerComponent(EntityData entity) => entity.assemblerId != 0;
         /// <summary>
         /// True if the entity's AssemblerComponent in the factory matches the entity.
         /// </summary>
@@ -1432,12 +1432,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's fractionatorId does not point to the null FractionatorComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_FractionatorComponent(in EntityData entity) => entity.fractionatorId != EntityData.Null.fractionatorId;
+        public static bool Uses_FractionatorComponent(in EntityData entity) => entity.fractionatorId != 0;
         /// <summary>
         /// True if the entity's fractionatorId does not point to the null FractionatorComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_FractionatorComponent(EntityData entity) => entity.fractionatorId != EntityData.Null.fractionatorId;
+        public static bool Uses_FractionatorComponent(EntityData entity) => entity.fractionatorId != 0;
         /// <summary>
         /// True if the entity's FractionatorComponent in the factory matches the entity.
         /// </summary>
@@ -1487,12 +1487,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's ejectorId does not point to the null EjectorComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_EjectorComponent(in EntityData entity) => entity.ejectorId != EntityData.Null.ejectorId;
+        public static bool Uses_EjectorComponent(in EntityData entity) => entity.ejectorId != 0;
         /// <summary>
         /// True if the entity's ejectorId does not point to the null EjectorComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_EjectorComponent(EntityData entity) => entity.ejectorId != EntityData.Null.ejectorId;
+        public static bool Uses_EjectorComponent(EntityData entity) => entity.ejectorId != 0;
         /// <summary>
         /// True if the entity's EjectorComponent in the factory matches the entity.
         /// </summary>
@@ -1542,12 +1542,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's siloId does not point to the null SiloComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_SiloComponent(in EntityData entity) => entity.siloId != EntityData.Null.siloId;
+        public static bool Uses_SiloComponent(in EntityData entity) => entity.siloId != 0;
         /// <summary>
         /// True if the entity's siloId does not point to the null SiloComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_SiloComponent(EntityData entity) => entity.siloId != EntityData.Null.siloId;
+        public static bool Uses_SiloComponent(EntityData entity) => entity.siloId != 0;
         /// <summary>
         /// True if the entity's SiloComponent in the factory matches the entity.
         /// </summary>
@@ -1597,12 +1597,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's labId does not point to the null LabComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_LabComponent(in EntityData entity) => entity.labId != EntityData.Null.labId;
+        public static bool Uses_LabComponent(in EntityData entity) => entity.labId != 0;
         /// <summary>
         /// True if the entity's labId does not point to the null LabComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_LabComponent(EntityData entity) => entity.labId != EntityData.Null.labId;
+        public static bool Uses_LabComponent(EntityData entity) => entity.labId != 0;
         /// <summary>
         /// True if the entity's LabComponent in the factory matches the entity.
         /// </summary>
@@ -1652,12 +1652,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's stationId does not point to the null StationComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_StationComponent(in EntityData entity) => entity.stationId != EntityData.Null.stationId;
+        public static bool Uses_StationComponent(in EntityData entity) => entity.stationId != 0;
         /// <summary>
         /// True if the entity's stationId does not point to the null StationComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_StationComponent(EntityData entity) => entity.stationId != EntityData.Null.stationId;
+        public static bool Uses_StationComponent(EntityData entity) => entity.stationId != 0;
         /// <summary>
         /// True if the entity's StationComponent in the factory matches the entity.
         /// </summary>
@@ -1707,12 +1707,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's powerGenId does not point to the null PowerGeneratorComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_PowerGeneratorComponent(in EntityData entity) => entity.powerGenId != EntityData.Null.powerGenId;
+        public static bool Uses_PowerGeneratorComponent(in EntityData entity) => entity.powerGenId != 0;
         /// <summary>
         /// True if the entity's powerGenId does not point to the null PowerGeneratorComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_PowerGeneratorComponent(EntityData entity) => entity.powerGenId != EntityData.Null.powerGenId;
+        public static bool Uses_PowerGeneratorComponent(EntityData entity) => entity.powerGenId != 0;
         /// <summary>
         /// True if the entity's PowerGeneratorComponent in the factory matches the entity.
         /// </summary>
@@ -1762,12 +1762,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's powerNodeId does not point to the null PowerNodeComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_PowerNodeComponent(in EntityData entity) => entity.powerNodeId != EntityData.Null.powerNodeId;
+        public static bool Uses_PowerNodeComponent(in EntityData entity) => entity.powerNodeId != 0;
         /// <summary>
         /// True if the entity's powerNodeId does not point to the null PowerNodeComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_PowerNodeComponent(EntityData entity) => entity.powerNodeId != EntityData.Null.powerNodeId;
+        public static bool Uses_PowerNodeComponent(EntityData entity) => entity.powerNodeId != 0;
         /// <summary>
         /// True if the entity's PowerNodeComponent in the factory matches the entity.
         /// </summary>
@@ -1817,12 +1817,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's powerConId does not point to the null PowerConsumerComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_PowerConsumerComponent(in EntityData entity) => entity.powerConId != EntityData.Null.powerConId;
+        public static bool Uses_PowerConsumerComponent(in EntityData entity) => entity.powerConId != 0;
         /// <summary>
         /// True if the entity's powerConId does not point to the null PowerConsumerComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_PowerConsumerComponent(EntityData entity) => entity.powerConId != EntityData.Null.powerConId;
+        public static bool Uses_PowerConsumerComponent(EntityData entity) => entity.powerConId != 0;
         /// <summary>
         /// True if the entity's PowerConsumerComponent in the factory matches the entity.
         /// </summary>
@@ -1872,12 +1872,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's powerAccId does not point to the null PowerAccumulatorComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_PowerAccumulatorComponent(in EntityData entity) => entity.powerAccId != EntityData.Null.powerAccId;
+        public static bool Uses_PowerAccumulatorComponent(in EntityData entity) => entity.powerAccId != 0;
         /// <summary>
         /// True if the entity's powerAccId does not point to the null PowerAccumulatorComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_PowerAccumulatorComponent(EntityData entity) => entity.powerAccId != EntityData.Null.powerAccId;
+        public static bool Uses_PowerAccumulatorComponent(EntityData entity) => entity.powerAccId != 0;
         /// <summary>
         /// True if the entity's PowerAccumulatorComponent in the factory matches the entity.
         /// </summary>
@@ -1927,12 +1927,12 @@ namespace Eirshy.DSP.Rythmn {
         /// True if the entity's powerExcId does not point to the null PowerExchangerComponent
         /// </summary>
         /// <remarks></remarks>
-        public static bool Uses_PowerExchangerComponent(in EntityData entity) => entity.powerExcId != EntityData.Null.powerExcId;
+        public static bool Uses_PowerExchangerComponent(in EntityData entity) => entity.powerExcId != 0;
         /// <summary>
         /// True if the entity's powerExcId does not point to the null PowerExchangerComponent
         /// </summary>
         /// <remarks>Provided strictly for LINQ convenience; prefer the pass-by-ref version.</remarks>
-        public static bool Uses_PowerExchangerComponent(EntityData entity) => entity.powerExcId != EntityData.Null.powerExcId;
+        public static bool Uses_PowerExchangerComponent(EntityData entity) => entity.powerExcId != 0;
         /// <summary>
         /// True if the entity's PowerExchangerComponent in the factory matches the entity.
         /// </summary>
