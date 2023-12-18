@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 namespace Eirshy.DSP.Rythmn.Utilities {
     public class Item : ProtoID<Item> {
         public enum _Roles {
-            Factory, Logistics, Gatherer, PowerDelivery, Generator, SphereDepoly, Tower,
-            Acc, Drone, Fuel, Sphere, Science, Spray, Other,
+            Factory, Logistics, Gatherer, PowerDelivery, Generator, SphereDepoly, LogTower, Military,
+            Acc, Fuel, Sphere, Science, Spray, Other,
             Raw, Refined, Component,
+            Bullet, Shell, PlasBall, Missile,
+            LogisticsDrone, TroopGround, TroopSpace,
+            FogMats,
         }
         public override int Id { get; }
         public _Roles Role { get; }
@@ -17,20 +20,30 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             Id = id; Role = role;
         }
         public static IEnumerable<Item> _AllWithRole(_Roles role) => _GetAll().Where(i => i.Role == role);
+        public static IEnumerable<Item> _AllWithRole(params _Roles[] roles) {
+            var set = new HashSet<_Roles>(roles);
+            return _GetAll().Where(i => set.Contains(i.Role));
+        }
 
         #region FACtories
         public static Item FacAss => new Item(2303, _Roles.Factory);
         public static Item FacAss2 => new Item(2304, _Roles.Factory);
         public static Item FacAss3 => new Item(2305, _Roles.Factory);
+        public static Item FacAssFog => new Item(2318, _Roles.Factory);
         public static Item FacChem => new Item(2309, _Roles.Factory);
+        public static Item FacChemFog => new Item(2317, _Roles.Factory);
         public static Item FacFract => new Item(2314, _Roles.Factory);
         public static Item FacLab => new Item(2901, _Roles.Factory);
+        public static Item FacLabFog => new Item(2902, _Roles.Factory);
         public static Item FacPart => new Item(2310, _Roles.Factory);
         public static Item FacRef => new Item(2308, _Roles.Factory);
         public static Item FacSmelt => new Item(2302, _Roles.Factory);
         public static Item FacSmelt2 => new Item(2315, _Roles.Factory);
+        public static Item FacSmeltFog => new Item(2319, _Roles.Factory);
         #endregion
         #region LOGistics
+        public static Item LogBelt1 => new Item(2001, _Roles.Logistics);
+        public static Item LogBelt2 => new Item(2002, _Roles.Logistics);
         public static Item LogBelt3 => new Item(2003, _Roles.Logistics);
         public static Item LogIns => new Item(2011, _Roles.Logistics);
         public static Item LogIns2 => new Item(2012, _Roles.Logistics);
@@ -41,6 +54,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item LogBox2 => new Item(2102, _Roles.Logistics);
         public static Item LogTank => new Item(2016, _Roles.Logistics);
         public static Item LogPiler => new Item(2106, _Roles.Logistics);
+        public static Item LogPilerAlt => new Item(2040, _Roles.Logistics);
         public static Item LogMonitor => new Item(2030, _Roles.Logistics);
         #endregion
         #region GET raw resources
@@ -69,23 +83,34 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item SphRail => new Item(2311, _Roles.SphereDepoly);
         #endregion
         #region TOWers
-        public static Item TowInter => new Item(2104, _Roles.Tower);
-        public static Item TowPlanet => new Item(2103, _Roles.Tower);
-        public static Item TowOrbit => new Item(2105, _Roles.Tower);
+        public static Item TowChest => new Item(2107, _Roles.LogTower);
+        public static Item TowInter => new Item(2104, _Roles.LogTower);
+        public static Item TowPlanet => new Item(2103, _Roles.LogTower);
+        public static Item TowOrbit => new Item(2105, _Roles.LogTower);
+        #endregion
+        #region MILitary
+        public static Item MilGauss => new Item(3001, _Roles.Military);
+        public static Item MilLaser => new Item(3002, _Roles.Military);
+        public static Item MilArtillery => new Item(3003, _Roles.Military);
+        public static Item MilPlasBall => new Item(3004, _Roles.Military);
+        public static Item MilMissile => new Item(3005, _Roles.Military);
+        public static Item MilJammer => new Item(3006, _Roles.Military);
+        public static Item MilSignal => new Item(3007, _Roles.Military);
+        public static Item MilShield => new Item(3008, _Roles.Military);
+        public static Item MilBase => new Item(3009, _Roles.Military);
+
         #endregion
 
         #region ACCumulators
         public static Item AccFull => new Item(2207, _Roles.Acc);
         public static Item AccEmpty => new Item(2206, _Roles.Acc);
         #endregion
-        #region Drones
-        public static Item DroneP => new Item(5001, _Roles.Drone);
-        public static Item DroneI => new Item(5002, _Roles.Drone);
-        #endregion
         #region Fuel Rods
         public static Item FuelAM => new Item(1803, _Roles.Fuel);
         public static Item FuelDT => new Item(1802, _Roles.Fuel);
         public static Item FuelH => new Item(1801, _Roles.Fuel);
+        public static Item FuelSA => new Item(1804, _Roles.Fuel);
+        
         #endregion
         #region SCIence cubes (by color)
         /// <summary>
@@ -125,6 +150,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         #region Other
 
         public static Item Foundation => new Item(1131, _Roles.Other);
+        public static Item SoilPile => new Item(1099, _Roles.Other);
         public static Item Warp => new Item(1210, _Roles.Other);
 
         #endregion
@@ -190,6 +216,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item CmpProc => new Item(1303, _Roles.Component);
         public static Item CmpQChip => new Item(1305, _Roles.Component);
         public static Item CmpSteel => new Item(1103, _Roles.Component);
+        public static Item CmpThruster0 => new Item(1407, _Roles.Component);
         public static Item CmpThruster1 => new Item(1405, _Roles.Component);
         public static Item CmpThruster2 => new Item(1406, _Roles.Component);
         public static Item CmpStrMat => new Item(1127, _Roles.Component);
@@ -197,6 +224,58 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item CmpTitanAlloy => new Item(1107, _Roles.Component);
         public static Item CmpTitanCry => new Item(1118, _Roles.Component);
         public static Item CmpTitanGlass => new Item(1119, _Roles.Component);
+        public static Item CmpExploBasic => new Item(1128, _Roles.Component);
+        public static Item CmpExplo => new Item(1129, _Roles.Component);
+        public static Item CmpExploCry => new Item(1130, _Roles.Component);
+        #endregion
+
+        #region Bullet
+        public static Item BulletOne => new Item(1601, _Roles.Bullet);
+        public static Item BulletTwo => new Item(1602, _Roles.Bullet);
+        public static Item BulletThree => new Item(1603, _Roles.Bullet);
+
+        #endregion
+        #region Shell
+        public static Item ShellOne => new Item(1604, _Roles.Shell);
+        public static Item ShellTwo => new Item(1605, _Roles.Shell);
+        public static Item ShellThree => new Item(1606, _Roles.Shell);
+
+        #endregion
+        #region PlasBall
+        public static Item PbOne => new Item(1607, _Roles.PlasBall);
+        public static Item PbTwo => new Item(1608, _Roles.Shell);
+
+        #endregion
+        #region Missile
+        public static Item MissileOne => new Item(1609, _Roles.Missile);
+        public static Item MissileTwo => new Item(1610, _Roles.Missile);
+        public static Item MissileThree => new Item(1611, _Roles.Missile);
+
+        #endregion
+
+        #region LOgistics DRone
+        public static Item LodrChest => new Item(5003, _Roles.LogisticsDrone);
+        public static Item LodrPlanet => new Item(5001, _Roles.LogisticsDrone);
+        public static Item LodrSystem => new Item(5002, _Roles.LogisticsDrone);
+        #endregion
+        #region TROop Ground
+        public static Item TrogBasic => new Item(5101, _Roles.TroopGround);
+        public static Item TrogSniper => new Item(5102, _Roles.TroopGround);
+        public static Item TrogTank => new Item(5103, _Roles.TroopGround);
+        #endregion
+        #region TROop Space
+        public static Item TrosCorv => new Item(5111, _Roles.TroopSpace);
+        public static Item TrosDest => new Item(5112, _Roles.TroopSpace);
+        #endregion
+
+        #region FOG Mats
+        public static Item FogMatrix => new Item(5201, _Roles.FogMats);
+        public static Item FogNeuron => new Item(5202, _Roles.FogMats);
+        public static Item FogRecomb => new Item(5203, _Roles.FogMats);
+        public static Item FogNegentropy => new Item(5204, _Roles.FogMats);
+        public static Item FogCore => new Item(5205, _Roles.FogMats);
+        public static Item FogShard => new Item(5206, _Roles.FogMats);
+
         #endregion
     }
 }
