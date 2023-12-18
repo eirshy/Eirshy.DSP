@@ -8,6 +8,7 @@ It does this by *re*-placing the highly-efficient constants in the game's origin
 Note that if you want to be able to tweak Miner and Pump buffers, you'll want my other mod, ***VeinityProject***. That one's potentially a lot more than just QoL, so I've split it off into a separate mod for purists.
 
 ## Changes
+- v0.2.1 Triage fix for broken thread safety assumptions in Labs, also prevents div-by-zero error.
 - v0.2.0 DarkFog Update; Included the PowerGenerator (Ray-Reciever, etc) support I wrote months ago.
 - v0.1.4 Added triage component-disablers for in case I'm slow to update something. Updated with note about *VeinityProject*.
 - v0.1.3 Fixed integer rounding issues causing us to misregister how much jello we eat on research.

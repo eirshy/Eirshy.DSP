@@ -4,7 +4,16 @@ using System.Runtime.CompilerServices;
 
 using HarmonyLib;
 
-//REMINDER: Large portions of this code is shared with the Dancer version!
+//A large part of this code made bad thread safety assumptions.
+//We need to correct those at some point.
+//Needs always goes first, but IU and UO2N can interleve, so while Needs
+// gives us some safety it can break if timings are bad.
+//I've sprinkled in a ton of extra Interlocked and snapshot most of my
+// guard values, but this really needs to just be reimplemented entirely.
+//Having to update Inc and Cnt separately is a big pain lol
+//Maybe have the at-tick-start values copied over to the unused side during needs,
+// then execute all changes on actual referencing those?
+//-eir
 
 namespace Eirshy.DSP.ReBuffer.NoRythhmn {
     static class LabComponentPatcher {
@@ -146,14 +155,16 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             int transCnt = next.requireCounts[i];
             //^^^ guaranteed available by how Needs works, as we always have at least 1x this if our needs are met
             if(transCnt > 0) {
+                var ipi_served = __instance.served[i];
+                int ipi = ipi_served <= 0 ? 0 : __instance.incServed[i] / ipi_served;
                 //was: split_inc ... which is needlessly complex lol
-                int ipi = __instance.incServed[i] / __instance.served[i];
                 var incTrans = ipi * transCnt;
-                __instance.served[i] -= transCnt;
-                __instance.incServed[i] -= incTrans;
                 //---------
-                next.served[i] += transCnt;
-                next.incServed[i] += incTrans;
+                Interlocked.Add(ref __instance.served[i], -transCnt);
+                Interlocked.Add(ref __instance.incServed[i], -incTrans);
+                //---------
+                Interlocked.Add(ref next.served[i], transCnt);
+                Interlocked.Add(ref next.incServed[i], incTrans);
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,14 +172,16 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             int transCnt = JELLO_CALORIES;
             //^^^ guaranteed available by how Needs works, as we always have at least 1x this if our needs are met
             if(transCnt > 0) {
+                var ipi_served = __instance.matrixServed[i];
                 //was: split_inc ... which is needlessly complex lol
-                int ipi = __instance.matrixIncServed[i] / __instance.matrixServed[i];
+                int ipi = ipi_served <= 0 ? 0 : __instance.matrixIncServed[i] / ipi_served;
                 var incTrans = ipi * transCnt;
-                __instance.matrixServed[i] -= transCnt;
-                __instance.matrixIncServed[i] -= incTrans;
                 //---------
-                next.matrixServed[i] += transCnt;
-                next.matrixIncServed[i] += incTrans;
+                Interlocked.Add(ref __instance.matrixServed[i], -transCnt);
+                Interlocked.Add(ref __instance.matrixIncServed[i], -incTrans);
+                //---------
+                Interlocked.Add(ref next.matrixServed[i], transCnt);
+                Interlocked.Add(ref next.matrixIncServed[i], incTrans);
             }
         }
 
@@ -292,7 +305,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         //These are basically all coppied wholesale from AssemblerComponent
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void InternalUpdate_inlineAddProd(ref LabComponent __instance, int i, int[] productRegister) {
-            __instance.produced[i] += __instance.productCounts[i];
+            Interlocked.Add(ref __instance.produced[i], __instance.productCounts[i]);
             Interlocked.Add(ref productRegister[__instance.products[i]], __instance.productCounts[i]);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -305,11 +318,14 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void InternalUpdate_inlineConsume(ref LabComponent __instance, int i, ref int proli, int[] consumeRegister) {
-			if(__instance.incServed[i] < 0 || __instance.served[i] <= 0) __instance.incServed[i] = 0;
-			//was: split_inc_level... which is needlessly complex lol
-			int ipi = __instance.incServed[i] / __instance.served[i];
-			__instance.served[i] -= __instance.requireCounts[i];
-			__instance.incServed[i] -= ipi * __instance.requireCounts[i];
+            int ipi;
+            if(__instance.incServed[i] < 0 || __instance.served[i] <= 0) {
+                __instance.incServed[i] = 0;
+                ipi = 0;
+            } else ipi = __instance.incServed[i] / __instance.served[i];
+            //was: split_inc_level... which is needlessly complex lol
+            Interlocked.Add(ref __instance.served[i], -__instance.requireCounts[i]);
+            Interlocked.Add(ref __instance.incServed[i], -(ipi * __instance.requireCounts[i]));
             //--------
             if(ipi < proli) proli = ipi;
             Interlocked.Add(ref consumeRegister[__instance.requires[i]], __instance.requireCounts[i]);
@@ -415,8 +431,9 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool InternalUpdateResearch_inlineCheckPoints(ref LabComponent __instance, int i, ref int hashPotential) {
-            if(__instance.matrixPoints[i] > 0) {
-                int pointed = __instance.matrixServed[i] / __instance.matrixPoints[i];
+            var points = __instance.matrixPoints[i];
+            if(points > 0) {
+                int pointed = __instance.matrixServed[i] / points;
                 if(pointed == 0) return true;
                 else if(pointed < hashPotential) hashPotential = pointed;
             }
@@ -424,17 +441,20 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void InternalUpdateResearch_inlineConsume(ref LabComponent __instance, int i, int iHashUp, ref int proli, int[] consumeRegister) {
-            if(__instance.matrixPoints[i] > 0) {
-                var consume = __instance.matrixPoints[i] * iHashUp;
+            var served = __instance.matrixServed[i];
+            var points = __instance.matrixPoints[i];
+            if(points > 0 && served > 0) {
+                var consume = points * iHashUp;
 
-                int ipi = __instance.matrixIncServed[i] / __instance.matrixServed[i];
+                int ipi = __instance.matrixIncServed[i] / served;
+                Interlocked.Add(ref __instance.matrixIncServed[i], -(ipi * consume));
                 __instance.matrixIncServed[i] -= ipi * consume;
                 if(ipi < proli) proli = ipi;
 
                 //can't avoid this, consume register doesn't track partials
-                var jelloStart = __instance.matrixServed[i] / JELLO_CALORIES;
-                __instance.matrixServed[i] -= consume;
-                var jelloEnd = __instance.matrixServed[i] / JELLO_CALORIES;
+                var jelloStart = served / JELLO_CALORIES;
+                Interlocked.Add(ref __instance.matrixServed[i], -consume);
+                var jelloEnd = served / JELLO_CALORIES;
                 
                 //This was not originally locked, but odds are not low that LabCmp / AssembleCmp / etc will probably be simul'd
                 Interlocked.Add(ref consumeRegister[LabComponent.matrixIds[i]], jelloStart - jelloEnd);
