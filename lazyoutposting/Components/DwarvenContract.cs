@@ -41,6 +41,8 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             var ret = LazyOutposting.ClonePrefab(LDB.models.Select(id).prefabDesc);
             ret.veinMiner = false;//hides from BuildTool_Click
             ret.minerType = EMinerType.None;//hides from PlanetFactory
+            //DO NOT FAKE isVeinCollector without taking more control of StationComponent gen!
+            // Required By: PlanetFactory.CreateEntityLogicComponents and PlanetTransport.NewStationComponent
             return ret;
         }
 
@@ -149,6 +151,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
                         pv.parameters = commuteTargets;
                         pv.paramCount = commuteTargets.Length;
+                        pv.filterId = veinPool[commuteTargets[0]].productId;
 
                         SwapToForged(in __instance, in pv, ref __state);
                         continue;
@@ -193,6 +196,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                     if(vein.id != vpi) continue;
                     if(Mission.CanTarget(vein.type) && MinerComponent.IsTargetVeinInRange(vein.pos, lpose, pv.desc)) {
                         forType = vein.type;
+                        pv.filterId = vein.productId;
                         break;
                     }
                 }
@@ -302,6 +306,9 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                 miner.veinCount = miner.veins.Length;
                 //miner.ArrangeVeinArray();//.ToArray is exact-sized, no need
             }
+            if(prebuild.filterId <= 0 && miner.veinCount >= 0) {
+                prebuild.filterId = __instance.veinPool[miner.veins[0]].productId;
+            }
 
             for(int vpi = miner.veinCount; vpi-- > 0;) {
                 __instance.RefreshVeinMiningDisplay(miner.veins[vpi], entityId, 0);
@@ -329,26 +336,34 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.CreateEntityLogicComponents))]
-        static void RehookMinerPowerConsumer(int entityId, ref PrefabDesc desc, int prebuildId, in PlanetFactory __instance, ref int __state) {
+        static void RehookMinerFeatures(int entityId, ref PrefabDesc desc, int prebuildId, in PlanetFactory __instance, ref int __state) {
             if(__state <= 0) return;//we didn't trip, so skip.
 
             ref var entity = ref __instance.entityPool[entityId];
+
             ref var miner = ref __instance.factorySystem.minerPool[entity.minerId];
             miner.pcId = entity.powerConId;
+
+            if(desc.isVeinCollector) {
+                var station = __instance.transport.GetStationComponent(entity.stationId);
+                station.minerId = miner.id;
+            }
         }
 
 
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(BuildingGizmo), nameof(BuildingGizmo.Update))]
-        static IEnumerable<CodeInstruction> BuildingGizmoFix(IEnumerable<CodeInstruction> raw) {
+        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.KillEntityFinally))]
+        [HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.UpdateGizmos))]
+        static IEnumerable<CodeInstruction> Lazy2048Fix(IEnumerable<CodeInstruction> raw) {
             var cis = raw.ToList();//unfortunate
             for(int ii = 0; ii < cis.Count; ii++) {
                 var ins = cis[ii];
                 if(ins.opcode == OpCodes.Ldc_I4  && (int)ins.operand == 2048) {
                     //just disallow ldc.i4 2048; it's a magic const only used by our stupid thing right now
                     //If it becomes a problem, we can isolate it better:
-                    // currently first two ldc.i4 2048 after ldfld bool PrefabDesc::isVeinCollector
+                    // generally will be the last two `ldc.i4 2048` after a `ldfld bool PrefabDesc::isVeinCollector`
                     cis[ii].Reop(OpCodes.Ldc_I4_0);
                 }
             }
@@ -356,9 +371,10 @@ namespace Eirshy.DSP.LazyOutposting.Components {
         }
 
 
+
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(PlayerControlGizmo), nameof(PlayerControlGizmo.OnOutlineDraw))]
-        static IEnumerable<CodeInstruction> PlayerControlGizmosFix(IEnumerable<CodeInstruction> raw) {
+        static IEnumerable<CodeInstruction> VeinRangeAnd2048_PlrCtrlGiz_OOD(IEnumerable<CodeInstruction> raw) {
             var cis = raw.ToList();//unfortunate
             for(int ii = 0; ii < cis.Count; ii++) {
                 var ins = cis[ii];

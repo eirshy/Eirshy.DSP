@@ -23,7 +23,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.3.2";
+        public const string VERSION = "1.3.3";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";//unused atm
@@ -54,9 +54,10 @@ namespace Eirshy.DSP.LazyOutposting {
             Logs = Logger;
             Logger.LogMessage($"Lazy Outposting - For anywhere but Hoxxes IV!");
 
-            //config
+            //config -- todo: move this into its own file lol
             const string HDR = nameof(LazyOutposting);
             const string HDR_DWARVES = HDR + "." + nameof(DwarvenContract);
+            const string HDR_BUGFIXES = HDR + ".zz.BugFixes";
             const string REQ_OTHER_MOD = "Requires the mod VeinityProject, otherwise will be ignored.";
 
             //migrate legacy setting names
@@ -80,6 +81,7 @@ namespace Eirshy.DSP.LazyOutposting {
                     case "1.3.0": migrationLevel = 2; break;
                     case "1.3.1": migrationLevel = 2; break;
                     case "1.3.2": migrationLevel = 2; break;
+                    case "1.3.3": migrationLevel = 2; break;
                 }
 
                 if(migrationLevel < 1) {
@@ -139,9 +141,21 @@ namespace Eirshy.DSP.LazyOutposting {
             
             var anyDwarves = GiveDwarvesBuckets || GiveDwarvesHaulers || GiveDwarvesLongPicks || GiveDwarvesShovels;
 
+
+            var run_Bugfix_v1_3_lt3 = Config.Bind<bool>(HDR_BUGFIXES, "Fix Issues: v1.3.0-v1.3.2", false, new ConfigDescription(
+                "If we should run the on-game-load fixes for save game issues created by v1.3.0 through v1.3.2 of this mod." +
+                "\nRequires us to iterate through all stations on all planets to reconnect parents. Note that deconstructing and" +
+                " reconstructing an affected VeinCollector (speed slider is broken) will also fix this issue."
+            )).Value;
+
+
+
+            //------
             if(doSettingsMigration) Config.Save();
+            //------
             if(anyDwarves) DwarvenContract.SetUp();
             if(EnableVaporCollection) VaporCollection.SetUp();
+            if(run_Bugfix_v1_3_lt3) Harmony.PatchAll(typeof(Bugfix_v1_3_lt3));
         }
 
         /// <summary>
@@ -169,6 +183,37 @@ namespace Eirshy.DSP.LazyOutposting {
             }
             return ret;
         }
+
+
+        private static class Bugfix_v1_3_lt3 {
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
+            static void FixDisconnectedMinerStations() {
+                if(DSPGame.IsMenuDemo) return;
+                Logs.LogWarning($"Looking for Disconnected Vein Collectors...");
+                var gdat = GameMain.data;
+                var found = 0;
+                var potential = gdat.factories
+                    .Where(pf => pf != null && pf.transport != null && pf.transport.stationPool != null)
+                    .ToList()
+                ;
+                //entity visitor, parallelize, but do so per-planet to keep it "simple"
+                potential.AsParallel().ForAll(pf => {
+                    foreach(var station in pf.transport.stationPool) {
+                        if(false
+                            || station == null
+                            || !station.isVeinCollector
+                            || station.entityId == 0 
+                            || station.minerId != 0
+                        ) continue;
+                        station.minerId = pf.entityPool[station.entityId].minerId;
+                        _ = Interlocked.Increment(ref found);
+                    }
+                });
+                Logs.LogWarning($"...Found and re-linked {found} Vein Collectors across {potential.Count} factories!");
+            }
+        }
+
     }
 
     internal static class Extensions {
