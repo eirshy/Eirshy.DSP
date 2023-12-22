@@ -351,7 +351,8 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(LabComponent), nameof(LabComponent.InternalUpdateResearch))]
         static void InternalUpdateResearch(
-            float power, float research_speed, int[] consumeRegister, ref TechState ts, ref int techHashedThisFrame, ref long uMatrixPoint, ref long hashRegister
+            float power, float research_speed, int[] consumeRegister, ref TechState ts, ref int techHashedThisFrame
+            , ref long uMatrixPoint, ref long hashRegister
             , ref LabComponent __instance, ref bool __runOriginal, ref uint __result
         ) {
             if(!__runOriginal) return;
@@ -443,7 +444,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         static void InternalUpdateResearch_inlineConsume(ref LabComponent __instance, int i, int iHashUp, ref int proli, int[] consumeRegister) {
             var served = __instance.matrixServed[i];
             var points = __instance.matrixPoints[i];
-            if(points > 0 && served > 0) {
+            if(points > 0) {
                 var consume = points * iHashUp;
 
                 int ipi = __instance.matrixIncServed[i] / served;
@@ -453,8 +454,8 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
 
                 //can't avoid this, consume register doesn't track partials
                 var jelloStart = served / JELLO_CALORIES;
-                Interlocked.Add(ref __instance.matrixServed[i], -consume);
-                var jelloEnd = served / JELLO_CALORIES;
+                var remain = Interlocked.Add(ref __instance.matrixServed[i], -consume);
+                var jelloEnd = remain / JELLO_CALORIES;
                 
                 //This was not originally locked, but odds are not low that LabCmp / AssembleCmp / etc will probably be simul'd
                 Interlocked.Add(ref consumeRegister[LabComponent.matrixIds[i]], jelloStart - jelloEnd);

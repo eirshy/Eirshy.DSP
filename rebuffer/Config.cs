@@ -74,7 +74,7 @@ namespace Eirshy.DSP.ReBuffer {
 
             foreach(var type in cfgTypes) {
                 var req = type == ERecipeType.Research ? REQ_LAB : REQ_ASM;
-                lookup_inp[(int)type] = cf.Bind<int>(HDR_IN, $"In{type}", 3, new ConfigDescription(
+                lookup_inp[(int)type] = cf.Bind<int>(HDR_IN, $"In{type}", 4, new ConfigDescription(
                     $"{req}" +
                     $"\nThe multiplier for the input buffers for {type} ({(int)type}) recipes."
                     , new AcceptableValueRange<int>(1, 100)
@@ -90,7 +90,7 @@ namespace Eirshy.DSP.ReBuffer {
             JelloAppetite = cf.Bind<int>(HDR_RES, nameof(JelloAppetite), 10, new ConfigDescription(
                 $"{REQ_LAB}" +
                 "\nThe multiplier for the input buffers for hash-producing (research-mode) labs."
-                , new AcceptableValueRange<int>(1, 100)
+                , new AcceptableValueRange<int>(2, 100)
             )).Value;
 
             //Dancer Only
@@ -107,7 +107,7 @@ namespace Eirshy.DSP.ReBuffer {
             RayrCataIn = cf.Bind<int>(HDR_RAYR, "Catalyst", 20, new ConfigDescription(
                 $"{REQ_RAYR}" +
                 "\nThe number of catalysts (ie, Grav Lenses) a rayr should hoard in itself." +
-                " Note that catalysts last for 1 minute (assuming 60 ticks per minute)."
+                " Note that catalysts last for 1 minute (assuming 60 ticks per second)."
                 , new AcceptableValueRange<int>(1, 100)
             )).Value;
             RayrProdOut = cf.Bind<int>(HDR_RAYR, "Product", 20, new ConfigDescription(
