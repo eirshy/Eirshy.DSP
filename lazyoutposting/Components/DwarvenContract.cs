@@ -133,6 +133,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             VeinData[] veinPool = __instance.factory.veinPool;
             foreach(var pv in __instance.buildPreviews) {
                 if(!pv.desc.veinMiner) continue;
+                if(pv.desc.waterPoints != null || pv.desc.waterPoints.Length > 0) continue;//ocean pumps are handled by VaporCollection
                 #region Haulers -- works with all dwarves!
                 if(commuteVein != EVeinType.None) {
                     int[] commuteTargets = null;//theoretically we can cache this somehow
@@ -270,6 +271,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
         [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.CreateEntityLogicComponents))]
         static void ForgePlanetFactoryHandling(int entityId, ref PrefabDesc desc, int prebuildId, in PlanetFactory __instance, ref int __state) {
             if(desc.minerType == EMinerType.None || desc.minerPeriod <= 0) return;//desc isn't our type.
+            if(desc.minerType == EMinerType.Water) return;//ocean is handled by VaporCollector
 
             if(prebuildId <= 0) return;//invalid prebuild
             ref var prebuild = ref __instance.prebuildPool[prebuildId];
