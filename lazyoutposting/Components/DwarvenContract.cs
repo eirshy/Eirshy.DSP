@@ -133,7 +133,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             VeinData[] veinPool = __instance.factory.veinPool;
             foreach(var pv in __instance.buildPreviews) {
                 if(!pv.desc.veinMiner) continue;
-                if(pv.desc.waterPoints != null || pv.desc.waterPoints.Length > 0) continue;//ocean pumps are handled by VaporCollection
+                if(pv.desc.waterPoints != null && pv.desc.waterPoints.Length > 0) continue;//ocean pumps are handled by VaporCollection
                 #region Haulers -- works with all dwarves!
                 if(commuteVein != EVeinType.None) {
                     int[] commuteTargets = null;//theoretically we can cache this somehow

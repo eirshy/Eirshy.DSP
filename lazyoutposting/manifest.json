@@ -1,6 +1,6 @@
 ﻿{
   "name": "LazyOutposting",
-  "version_number": "1.3.4",
+  "version_number": "1.3.5",
   "website_url": "https://github.com/eirshy/Eirshy.DSP",
   "description": "Man, I need MORE iron ore? Fiiine I'll go find a planet for it... After this drink.",
   "dependencies": [

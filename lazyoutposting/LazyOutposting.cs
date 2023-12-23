@@ -23,7 +23,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.3.4";
+        public const string VERSION = "1.3.5";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";//unused atm
@@ -75,6 +75,7 @@ namespace Eirshy.DSP.LazyOutposting {
                 };
                 int migrationLevel;
                 switch(configVer.Value) {
+                    //todo: make this not an update every version change lol
                     default: migrationLevel = 0; break;
                     case "1.2.0.0": migrationLevel = 1; break;
                     case "1.2.1": migrationLevel = 1; break;
@@ -82,6 +83,7 @@ namespace Eirshy.DSP.LazyOutposting {
                     case "1.3.1": migrationLevel = 2; break;
                     case "1.3.2": migrationLevel = 2; break;
                     case "1.3.3": migrationLevel = 2; break;
+                    case "1.3.4": migrationLevel = 2; break;
                 }
 
                 if(migrationLevel < 1) {

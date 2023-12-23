@@ -12,9 +12,9 @@ All options are toggleable, so you can freely decide just how lazy you want to b
 
 ## Changes
 
+- v1.3.5 Fix for miners (broke last version lol)
 - v1.3.4 Fix for Water Pumps erroring on placement.
 - v1.3.3 Fix for various mk2 miner issues
-- v1.3.2 Fix for Water Pumps throwing a NullRefEx if shovels are enabled lol
 - v1.3.0 DarkFog Update; Added Shovels
 
 ## Controls
