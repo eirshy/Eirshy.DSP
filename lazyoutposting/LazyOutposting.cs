@@ -23,7 +23,7 @@ namespace Eirshy.DSP.LazyOutposting {
         public const string MODID = "LazyOutposting";
         public const string ROOT = "eirshy.dsp.";
         public const string GUID = ROOT + MODID;
-        public const string VERSION = "1.3.5";
+        public const string VERSION = "1.4.0";
         public const string NAME = "Lazy Outposting";
 
         internal const string OTHERMOD_BPTWEEKS = "org.kremnev8.plugin.BlueprintTweaks";//unused atm
@@ -36,6 +36,7 @@ namespace Eirshy.DSP.LazyOutposting {
 
         internal static bool EnableVaporCollection { get; private set; } = true;
 
+        internal static bool EnableOptimizationsOnly { get; private set; } = false;
         internal static bool GiveDwarvesHaulers { get; private set; } = true;
         static bool _GiveDwarvesBuckets = true;
         internal static bool GiveDwarvesBuckets {
@@ -61,7 +62,7 @@ namespace Eirshy.DSP.LazyOutposting {
             const string REQ_OTHER_MOD = "Requires the mod VeinityProject, otherwise will be ignored.";
 
             //migrate legacy setting names
-            var configVer = Config.Bind<string>(HDR, "ConfigVersion", "0", new ConfigDescription(
+            var configVer = Config.Bind<string>(HDR, "ConfigVersion", "0.0.0", new ConfigDescription(
                 "Internal value used to migrate settings."
             ));
             var doSettingsMigration = configVer.Value != VERSION;
@@ -74,17 +75,13 @@ namespace Eirshy.DSP.LazyOutposting {
                     { "false", false },
                 };
                 int migrationLevel;
-                switch(configVer.Value) {
-                    //todo: make this not an update every version change lol
-                    default: migrationLevel = 0; break;
-                    case "1.2.0.0": migrationLevel = 1; break;
-                    case "1.2.1": migrationLevel = 1; break;
-                    case "1.3.0": migrationLevel = 2; break;
-                    case "1.3.1": migrationLevel = 2; break;
-                    case "1.3.2": migrationLevel = 2; break;
-                    case "1.3.3": migrationLevel = 2; break;
-                    case "1.3.4": migrationLevel = 2; break;
-                }
+                var configVerSplit = configVer.Value.Split('.').Select(x=>int.TryParse(x, out var ret) ? ret : 0).ToList();
+                if(configVerSplit.Count < 3) migrationLevel = 0;
+                else if(configVerSplit[0] == 1 && configVerSplit[1] < 3) {
+                    migrationLevel = 1;
+                } else migrationLevel = 2;
+
+                #region Migration Level 0 
 
                 if(migrationLevel < 1) {
                     const string key = "EnableDwarvenCommute";
@@ -103,14 +100,19 @@ namespace Eirshy.DSP.LazyOutposting {
                     toDelete.Add(legacyValue.Definition);
                 }
 
+                #endregion
+                #region Migration Level 1
+
                 if(migrationLevel < 2) {
                     const string key = "GiveTechDwarvesLongPicks";
-                    legacyValue = Config.Bind<string>(HDR, key, "", legacyDesc);
+                    legacyValue = Config.Bind<string>(HDR_DWARVES, key, "", legacyDesc);
                     if(readBool.TryGetValue(legacyValue.Value.ToLower(), out var val)) {
                         GiveDwarvesLongPicks = val;
                     }
                     toDelete.Add(legacyValue.Definition);
                 }
+
+                #endregion
 
                 configVer.Value = VERSION;
                 Logs.LogWarning($"Removed: ${toDelete.Select(Config.Remove).Where(b => b).Count()}/{toDelete.Count}");
@@ -123,6 +125,10 @@ namespace Eirshy.DSP.LazyOutposting {
 
 
             //Dwarf Settings
+            EnableOptimizationsOnly = Config.Bind<bool>(HDR_DWARVES, nameof(EnableOptimizationsOnly), EnableOptimizationsOnly, new ConfigDescription(
+                "If enabled, we'll run only the optimization components of our miner changes, and ignnore any non-vanilla-like settings under this header." +
+                "\nMostly, this fixes the memory thrashing caused by Miner Mk2s."
+            )).Value;
             GiveDwarvesHaulers = Config.Bind<bool>(HDR_DWARVES, nameof(GiveDwarvesHaulers), GiveDwarvesHaulers, new ConfigDescription(
                 "If we should enable planet-wide mining. Usable by both regular miners and mk2 miners."
             )).Value;
@@ -141,7 +147,7 @@ namespace Eirshy.DSP.LazyOutposting {
                 "\nNote that this is implied by Long Picks, due to a difficulty in implementing Long Picks without Shovels."
             )).Value;
             
-            var anyDwarves = GiveDwarvesBuckets || GiveDwarvesHaulers || GiveDwarvesLongPicks || GiveDwarvesShovels;
+            var anyDwarves = EnableOptimizationsOnly || GiveDwarvesBuckets || GiveDwarvesHaulers || GiveDwarvesLongPicks || GiveDwarvesShovels;
 
 
             var run_Bugfix_v1_3_lt3 = Config.Bind<bool>(HDR_BUGFIXES, "Fix Issues: v1.3.0-v1.3.2", false, new ConfigDescription(

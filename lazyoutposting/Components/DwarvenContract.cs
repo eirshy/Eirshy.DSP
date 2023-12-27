@@ -23,7 +23,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                 | (LazyOutposting.GiveDwarvesLongPicks ? DwarfMission.EGear.LongPicks : 0)
                 | (LazyOutposting.GiveDwarvesShovels ? DwarfMission.EGear.Shovels : 0)
             ;
-            if(gear == DwarfMission.EGear.StandardOnly) return;//Vanilla dwarves have standard gear already
+            if(LazyOutposting.EnableOptimizationsOnly) gear = DwarfMission.EGear.StandardOnly;
 
             Mission = new DwarfMission(gear);
             LazyOutposting.Harmony.PatchAll(typeof(DwarvenContract));
@@ -134,7 +134,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             foreach(var pv in __instance.buildPreviews) {
                 if(!pv.desc.veinMiner) continue;
                 if(pv.desc.waterPoints != null && pv.desc.waterPoints.Length > 0) continue;//ocean pumps are handled by VaporCollection
-                #region Haulers -- works with all dwarves!
+                #region Haulers -- skips most vein checks when active
                 if(commuteVein != EVeinType.None) {
                     int[] commuteTargets = null;//theoretically we can cache this somehow
                     if(commuteTargets == null) {
@@ -159,7 +159,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                     }
                 }
                 #endregion
-                #region Rest (non-Hauler)
+                #region Vein checks
 
                 //We could likely eek a bit more perf out of this part by *not* using MC.IsTargetVeinInRange
                 // but it's only vector math that can hoist some computations. Most complex is:
