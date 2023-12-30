@@ -354,8 +354,8 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             __runOriginal = false;
 
             if(__instance.served == null || __instance.served.Length < 6) {
-                __instance.matrixServed = new int[6];
-                __instance.matrixIncServed = new int[6];
+                __instance.served = new int[6];
+                __instance.incServed = new int[6];
             }
 
             __instance.needs[0] = __instance.matrixServed[0] < JelloPlateSize ? 6001 : 0;

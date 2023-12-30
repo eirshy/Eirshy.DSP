@@ -8,16 +8,15 @@ It does this by *re*-placing the highly-efficient constants in the game's origin
 Note that if you want to be able to tweak Miner and Pump buffers, you'll want my other mod, ***VeinityProject***. That one's potentially a lot more than just QoL, so I've split it off into a separate mod for purists.
 
 ## Changes
+- v0.2.4 Fixed null reference error on the lab component (oops lol)
 - v0.2.3 Separated readers from writers on Labs, fixing the race condition.
-- v0.2.2 Triage fix for the "Didn't expend jello you're cheating!" error- I misregistered consumption lol
-- v0.2.1 Triage fix for broken thread safety assumptions in Labs, also prevents div-by-zero error.
 - v0.2.0 DarkFog Update; Included the PowerGenerator (Ray-Reciever, etc) support I wrote months ago.
 - v0.1.4 Added triage component-disablers for in case I'm slow to update something. Updated with note about *VeinityProject*.
-- v0.1.3 Fixed integer rounding issues causing us to misregister how much jello we eat on research.
 
 ## Mechanical changes compared to vanilla
 As a note, part of the speed gain is by allowing certain mechanical edge-cases to just happen, as well as changing certain behaviors. Notably...
 - ***Proliferator residue is not aggressively cleaned out of each slot.***<br />Mixing item types of different levels will still use the lowest level, but a single item kind with mixed levels won't "lose" the extra proliferator.
+- ***Research Labs can no longer consume items they recieved from pass-up on the same tick they got the items.***
 - ***Research Labs no longer "lose" spare hash byte upon tech completion or rate limiting.***
 - ***Research Labs now prioritize keeping their own buffer satisfied before passing items up.***
 - ***Research Labs may batch item send-ups instead of doing them one at a time.***<br />The batching cap is the same as the recipe's cost, so there's not much of a change with this mod by itself.
