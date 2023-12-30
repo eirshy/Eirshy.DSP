@@ -33,6 +33,13 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             ReBuffer.Harmony.PatchAll(typeof(LabComponentPatcher));
         }
 
+        //Safety theory: We use the off mode's storage (research vs assemble) to store the values from at time of
+        // the Needs step (which happens always entirely before the up/down & consume steps) so we have completely
+        // separated reads from writes; we then do all of our writes to the "real" values while our Reads are always
+        // from the start-of-tick values.
+        //This means we're sort-of running on "last tick's" resources, but it also means our writers and readers are
+        // fully separated.
+
         #region Math helpers
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -155,8 +162,8 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             int transCnt = next.requireCounts[i];
             //^^^ guaranteed available by how Needs works, as we always have at least 1x this if our needs are met
             if(transCnt > 0) {
-                var ipi_served = __instance.served[i];
-                int ipi = ipi_served <= 0 ? 0 : __instance.incServed[i] / ipi_served;
+                var ipi_served = __instance.matrixServed[i];
+                int ipi = ipi_served <= 0 ? 0 : __instance.matrixIncServed[i] / ipi_served;
                 //was: split_inc ... which is needlessly complex lol
                 var incTrans = ipi * transCnt;
                 //---------
@@ -172,9 +179,9 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
             int transCnt = JELLO_CALORIES;
             //^^^ guaranteed available by how Needs works, as we always have at least 1x this if our needs are met
             if(transCnt > 0) {
-                var ipi_served = __instance.matrixServed[i];
+                var ipi_served = __instance.served[i];
                 //was: split_inc ... which is needlessly complex lol
-                int ipi = ipi_served <= 0 ? 0 : __instance.matrixIncServed[i] / ipi_served;
+                int ipi = ipi_served <= 0 ? 0 : __instance.incServed[i] / ipi_served;
                 var incTrans = ipi * transCnt;
                 //---------
                 Interlocked.Add(ref __instance.matrixServed[i], -transCnt);
@@ -193,6 +200,12 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         static void UpdateNeedsAssemble(ref LabComponent __instance, ref bool __runOriginal) {
             if(!__runOriginal) return;
             __runOriginal = false;
+
+            if(__instance.matrixServed == null) {
+                __instance.matrixServed = new int[6];
+                __instance.matrixIncServed = new int[6];
+            }
+
             switch(__instance.served.Length) {
                 case 6: UpdateNeedsAssemble_inline(ref __instance, 5); goto case 5;
                 case 5: UpdateNeedsAssemble_inline(ref __instance, 4); goto case 4;
@@ -201,6 +214,9 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
                 case 2: UpdateNeedsAssemble_inline(ref __instance, 1); goto case 1;
                 case 1: UpdateNeedsAssemble_inline(ref __instance, 0); break;
             }
+
+            Array.Copy(__instance.served, __instance.matrixServed, __instance.served.Length);
+            Array.Copy(__instance.incServed, __instance.matrixIncServed, __instance.incServed.Length);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void UpdateNeedsAssemble_inline(ref LabComponent __instance, int i) {
@@ -314,15 +330,12 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool InternalUpdate_inlineIsLacking(ref LabComponent __instance, int i) {
-            return __instance.served[i] < __instance.requireCounts[i] || __instance.served[i] == 0;
+            //is there a reason 0 is a necessary check here?
+            return __instance.matrixServed[i] < __instance.requireCounts[i] || __instance.matrixServed[i] == 0;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void InternalUpdate_inlineConsume(ref LabComponent __instance, int i, ref int proli, int[] consumeRegister) {
-            int ipi;
-            if(__instance.incServed[i] < 0 || __instance.served[i] <= 0) {
-                __instance.incServed[i] = 0;
-                ipi = 0;
-            } else ipi = __instance.incServed[i] / __instance.served[i];
+            int ipi = __instance.matrixServed[i] <= 0 ? 0 : __instance.matrixIncServed[i] / __instance.matrixServed[i];
             //was: split_inc_level... which is needlessly complex lol
             Interlocked.Add(ref __instance.served[i], -__instance.requireCounts[i]);
             Interlocked.Add(ref __instance.incServed[i], -(ipi * __instance.requireCounts[i]));
@@ -339,12 +352,21 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         static void UpdateNeedsResearch(ref LabComponent __instance, ref bool __runOriginal) {
             if(!__runOriginal) return;
             __runOriginal = false;
+
+            if(__instance.served == null || __instance.served.Length < 6) {
+                __instance.matrixServed = new int[6];
+                __instance.matrixIncServed = new int[6];
+            }
+
             __instance.needs[0] = __instance.matrixServed[0] < JelloPlateSize ? 6001 : 0;
             __instance.needs[1] = __instance.matrixServed[1] < JelloPlateSize ? 6002 : 0;
             __instance.needs[2] = __instance.matrixServed[2] < JelloPlateSize ? 6003 : 0;
             __instance.needs[3] = __instance.matrixServed[3] < JelloPlateSize ? 6004 : 0;
             __instance.needs[4] = __instance.matrixServed[4] < JelloPlateSize ? 6005 : 0;
             __instance.needs[5] = __instance.matrixServed[5] < JelloPlateSize ? 6006 : 0;
+
+            Array.Copy(__instance.matrixServed, __instance.served, __instance.matrixServed.Length);
+            Array.Copy(__instance.matrixIncServed, __instance.incServed, __instance.matrixIncServed.Length);
         }
 
 
@@ -434,7 +456,7 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         static bool InternalUpdateResearch_inlineCheckPoints(ref LabComponent __instance, int i, ref int hashPotential) {
             var points = __instance.matrixPoints[i];
             if(points > 0) {
-                int pointed = __instance.matrixServed[i] / points;
+                int pointed = __instance.served[i] / points;
                 if(pointed == 0) return true;
                 else if(pointed < hashPotential) hashPotential = pointed;
             }
@@ -442,14 +464,13 @@ namespace Eirshy.DSP.ReBuffer.NoRythhmn {
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void InternalUpdateResearch_inlineConsume(ref LabComponent __instance, int i, int iHashUp, ref int proli, int[] consumeRegister) {
-            var served = __instance.matrixServed[i];
+            var served = __instance.served[i];
             var points = __instance.matrixPoints[i];
             if(points > 0) {
                 var consume = points * iHashUp;
 
-                int ipi = __instance.matrixIncServed[i] / served;
+                int ipi = served == 0 ? 0 : __instance.incServed[i] / served;
                 Interlocked.Add(ref __instance.matrixIncServed[i], -(ipi * consume));
-                __instance.matrixIncServed[i] -= ipi * consume;
                 if(ipi < proli) proli = ipi;
 
                 //can't avoid this, consume register doesn't track partials
