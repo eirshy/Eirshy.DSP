@@ -276,13 +276,17 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             if(prebuildId <= 0) return;//invalid prebuild
             ref var prebuild = ref __instance.prebuildPool[prebuildId];
             if(prebuild.id != prebuildId) return;//disposed prebuild
-
+            
             var minerId = __instance.factorySystem.NewMinerComponent(entityId, desc);
             if(minerId == 0) return;//failed to generate miner component; switch to default execution so default recovery may work
             ref var miner = ref __instance.factorySystem.minerPool[minerId];
             ref var sign = ref __instance.entitySignPool[entityId];
 
-            if(Mission.HasShovels || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein)) {
+            //Vein copying- with height check
+            if(prebuild.isDestroyed //rebuilding, just assume the prebuild's veins as truth
+                || Mission.HasShovels //specifically ignores height checks
+                || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein)//hauler mode mustn't call MC.ITVIR()
+            ) {
                 //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
                 miner.veins = new int[prebuild.paramCount];
                 Array.Copy(prebuild.parameters ?? Array.Empty<int>(), 0, miner.veins, 0, prebuild.paramCount);
