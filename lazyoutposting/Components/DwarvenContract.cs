@@ -282,10 +282,16 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             ref var miner = ref __instance.factorySystem.minerPool[minerId];
             ref var sign = ref __instance.entitySignPool[entityId];
 
-            //Vein copying- with height check
-            if(prebuild.isDestroyed //rebuilding, just assume the prebuild's veins as truth
-                || Mission.HasShovels //specifically ignores height checks
-                || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein)//hauler mode mustn't call MC.ITVIR()
+            //We can't easily pull the 2048 out of VeinCollectors on rebuild, so...
+
+
+            if(desc.isVeinCollector && prebuild.paramCount >= 2048) {
+                //Special handling for when the 2048 survived
+                miner.veins = new int[prebuild.paramCount - 2048];
+                Array.Copy(prebuild.parameters, 2048, miner.veins, 0, miner.veins.Length);
+                miner.veinCount = miner.veins.Length;
+            } else if( //Vein Heigh Check Skip
+                prebuild.isDestroyed || Mission.HasShovels || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein)
             ) {
                 //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
                 miner.veins = new int[prebuild.paramCount];
@@ -360,8 +366,9 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(BuildingGizmo), nameof(BuildingGizmo.Update))]
-        [HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.KillEntityFinally))]
         [HarmonyPatch(typeof(BuildTool_Click), nameof(BuildTool_Click.UpdateGizmos))]
+        //on-kill uses the 2048 for the StationComponent settings, grumble grumble
+        //[HarmonyPatch(typeof(PlanetFactory), nameof(PlanetFactory.KillEntityFinally))]
         static IEnumerable<CodeInstruction> Lazy2048Fix(IEnumerable<CodeInstruction> raw) {
             var cis = raw.ToList();//unfortunate
             for(int ii = 0; ii < cis.Count; ii++) {
@@ -382,13 +389,31 @@ namespace Eirshy.DSP.LazyOutposting.Components {
         [HarmonyPatch(typeof(PlayerControlGizmo), nameof(PlayerControlGizmo.OnOutlineDraw))]
         static IEnumerable<CodeInstruction> VeinRangeAnd2048_PlrCtrlGiz_OOD(IEnumerable<CodeInstruction> raw) {
             var cis = raw.ToList();//unfortunate
+            var did2048TestSwap = false;
             for(int ii = 0; ii < cis.Count; ii++) {
                 var ins = cis[ii];
-                if(ins.opcode == OpCodes.Ldc_I4  && (int)ins.operand == 2048) {
-                    //just disallow ldc.i4 2048; it's a magic const only used by our stupid thing right now
-                    //If it becomes a problem, we can isolate it better:
-                    // currently first two ldc.i4 2048 after ldfld bool PrefabDesc::isVeinCollector
-                    cis[ii].Reop(OpCodes.Ldc_I4_0);
+
+                if(!did2048TestSwap && ins.opcode == OpCodes.Ldc_I4  && (int)ins.operand == 2048) {
+                    //ii should be IL_0461
+                    var jmp = cis[ii-1];
+                    var ldIsVeinMiner = cis[ii-2];
+                    var ldPrefabDesc = cis[ii-3];
+                    var ldPrefabDescLoc = cis[ii-4];
+                    var stoParamsCount = cis[ii-7];
+                    
+                    LazyOutposting.Logs.LogWarning("... Player Gizmo Outlines, lookaround for 2048 offset...");
+                    if(jmp.opcode != OpCodes.Brfalse && jmp.opcode != OpCodes.Brfalse_S) continue;
+                    if(ldIsVeinMiner.opcode != OpCodes.Ldfld) continue;
+                    if(ldPrefabDesc.opcode != OpCodes.Ldfld) continue;
+                    if(stoParamsCount.opcode != OpCodes.Stloc && stoParamsCount.opcode != OpCodes.Stloc_S) continue;
+
+                    ldPrefabDescLoc.Reop(OpCodes.Nop);
+                    ldPrefabDesc.Reop(stoParamsCount.opcode == OpCodes.Stloc ? OpCodes.Ldloc : OpCodes.Ldloc_S, stoParamsCount.operand);
+                    ldIsVeinMiner.Reop(OpCodes.Ldc_I4, 2048);
+                    jmp.Reop(jmp.opcode == OpCodes.Brfalse ? OpCodes.Blt : OpCodes.Blt_S, jmp.operand);
+
+                    LazyOutposting.Logs.LogWarning("... Lookaround Success!");
+                    did2048TestSwap = true;
                 }
                 if(ins.opcode == OpCodes.Call && ins.operand is MethodInfo mi && mi == MinerIsVeinInRange.Value) {
                     var prev = cis[ii-1];
@@ -409,7 +434,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                     cis[ii].Reop(OpCodes.Ldc_I4_1);
                 }
             }
-
+            if(!did2048TestSwap) LazyOutposting.Logs.LogError("... Player Gizmo Outlines could not find 2048 with expected context.");
             return cis;
         }
 

@@ -18,11 +18,11 @@ If you turn that on, we'll run as close to vanilla as possible, but without, for
 
 ## Changes
 
-- v1.4.1 Fix for undestroyed miners, probably
+- v1.4.2 Fix for rebuilding miners, more probably
+- v1.4.1 Fix for rebuilding miners, probably
 - v1.4.0 Added "Optimizations Only" mode for Dwarves.
 - v1.3.5 Fix for miners (broke last version lol)
 - v1.3.4 Fix for Water Pumps erroring on placement.
-- v1.3.3 Fix for various mk2 miner issues
 
 ## Controls
 - Press *PageUp* to cycle forwards in the hauler resource list.
