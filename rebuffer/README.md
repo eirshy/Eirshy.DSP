@@ -7,7 +7,18 @@ It does this by *re*-placing the highly-efficient constants in the game's origin
 
 Note that if you want to be able to tweak Miner and Pump buffers, you'll want my other mod, ***VeinityProject***. That one's potentially a lot more than just QoL, so I've split it off into a separate mod for purists.
 
+### NOTE On Settings
+By default we drop the output buffers to 5x iterations of the recipe. This is generally a very good thing- less materials sitting around converted into potentially the wrong item, 
+less you have to deal with temp storage when rebuilding something, etc. However it might be bothersome in the super early game if you aren't hooking up things to chests for your 
+handcrafting mini-malls. If this is a problem for you, I'd recommmend either cranking the output multiplier up (50 is likely around what you'd want), or just leaving this mod off 
+until you're out of that phase. The performance gains this mod provides are rather unimportant until you're on at least two planets anyways.
+
+Also note, output multipliers limit the buffer to nx +1, *not* to nx. So a multiplier of 5 on a recipe that produces 1 item will stop at 6 items in the output buffer, while a recipe
+that produces 3 items will stop at 16 items in the output buffer. This is caused by a guard against a dirty array read I've left in to prevent an empty output buffer from being able
+to ever be considered "full" without doing a second check.
+
 ## Changes
+- v0.2.5 Increased the max buffer multiplier to 500 so you can actually do what the first line of this readme says.
 - v0.2.4 Fixed null reference error on the lab component (oops lol)
 - v0.2.3 Separated readers from writers on Labs, fixing the race condition.
 - v0.2.0 DarkFog Update; Included the PowerGenerator (Ray-Reciever, etc) support I wrote months ago.

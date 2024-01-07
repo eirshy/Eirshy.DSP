@@ -1,6 +1,6 @@
 ﻿{
   "name": "ReBuffer",
-  "version_number": "0.2.4",
+  "version_number": "0.2.5",
   "website_url": "https://github.com/eirshy/Eirshy.DSP",
   "description": "Re-writes the code surrounding buffer limits to expose settings for them and to improve UPS.",
   "dependencies": [

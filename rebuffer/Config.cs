@@ -77,12 +77,12 @@ namespace Eirshy.DSP.ReBuffer {
                 lookup_inp[(int)type] = cf.Bind<int>(HDR_IN, $"In{type}", 4, new ConfigDescription(
                     $"{req}" +
                     $"\nThe multiplier for the input buffers for {type} ({(int)type}) recipes."
-                    , new AcceptableValueRange<int>(1, 100)
+                    , new AcceptableValueRange<int>(1, 500)
                 )).Value;
                 lookup_oup[(int)type] = cf.Bind<int>(HDR_OUT, $"Out{type}", 5, new ConfigDescription(
                     $"{req}" +
                     $"\nThe multiplier for the output buffers for {type} ({(int)type}) recipes."
-                    , new AcceptableValueRange<int>(1, 100)
+                    , new AcceptableValueRange<int>(1, 500)
                 )).Value;
             }
         }
@@ -90,7 +90,7 @@ namespace Eirshy.DSP.ReBuffer {
             JelloAppetite = cf.Bind<int>(HDR_RES, nameof(JelloAppetite), 10, new ConfigDescription(
                 $"{REQ_LAB}" +
                 "\nThe multiplier for the input buffers for hash-producing (research-mode) labs."
-                , new AcceptableValueRange<int>(2, 100)
+                , new AcceptableValueRange<int>(2, 500)
             )).Value;
 
             //Dancer Only
@@ -108,12 +108,12 @@ namespace Eirshy.DSP.ReBuffer {
                 $"{REQ_RAYR}" +
                 "\nThe number of catalysts (ie, Grav Lenses) a rayr should hoard in itself." +
                 " Note that catalysts last for 1 minute (assuming 60 ticks per second)."
-                , new AcceptableValueRange<int>(1, 100)
+                , new AcceptableValueRange<int>(1, 500)
             )).Value;
             RayrProdOut = cf.Bind<int>(HDR_RAYR, "Product", 20, new ConfigDescription(
                 $"{REQ_RAYR}" +
                 "\nThe number of products (ie, Crit Photons) a rayr should keep ahold of."
-                , new AcceptableValueRange<int>(1, 100)
+                , new AcceptableValueRange<int>(1, 500)
             )).Value;
 
             RayrPiling = cf.Bind<bool>(HDR_RAYR, "ProductPiling", false, new ConfigDescription(
