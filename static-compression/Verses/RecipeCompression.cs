@@ -196,8 +196,8 @@ namespace Eirshy.DSP.StaticCompression.Verses {
 
         }
 
-        protected override void _stanza_setup_ProtosCreatedReadOnly() => createdRO_CalcSettings();
-        protected override void _stanza_setup_ProtosCreated() {
+        protected override void _stanza_setup_ProtosUpdatedReadOnly() => createdRO_CalcSettings();
+        protected override void _stanza_setup_ProtosUpdated() {
             created_DoStandard();
             created_DoFract();
         }

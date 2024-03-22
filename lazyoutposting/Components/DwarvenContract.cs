@@ -381,12 +381,12 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(PlayerControlGizmo), nameof(PlayerControlGizmo.OnOutlineDraw))]
-        static IEnumerable<CodeInstruction> VeinRangeAnd2048_PlrCtrlGiz_OOD(IEnumerable<CodeInstruction> raw) {
+        static IEnumerable<CodeInstruction> PlayerControlGizmo_OOD(IEnumerable<CodeInstruction> raw) {
             var cis = raw.ToList();//unfortunate
             var did2048TestSwap = false;
             for(int ii = 0; ii < cis.Count; ii++) {
                 var ins = cis[ii];
-
+                #region 2048 fancy ver
                 if(!did2048TestSwap && ins.opcode == OpCodes.Ldc_I4  && (int)ins.operand == 2048) {
                     //ii should be IL_0461
                     var jmp = cis[ii-1];
@@ -409,6 +409,8 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                     LazyOutposting.Logs.LogWarning("... Lookaround Success!");
                     did2048TestSwap = true;
                 }
+                #endregion
+                #region Control of Miner Is Vein In Range call
                 if(ins.opcode == OpCodes.Call && ins.operand is MethodInfo mi && mi == MinerIsVeinInRange.Value) {
                     var prev = cis[ii-1];
                     if(prev.opcode != OpCodes.Ldfld) continue;
@@ -427,6 +429,8 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                     cis[ii-1].Reop(OpCodes.Nop);
                     cis[ii].Reop(OpCodes.Ldc_I4_1);
                 }
+                #endregion
+                //TO ADD: find a lfld for veins array, then add a bonus bail after the null and length checks if length > say 50
             }
             if(!did2048TestSwap) LazyOutposting.Logs.LogError("... Player Gizmo Outlines could not find 2048 with expected context.");
             return cis;

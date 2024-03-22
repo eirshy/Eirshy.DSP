@@ -340,14 +340,14 @@ namespace Eirshy.DSP.VeinityProject {
 										if(consume > 0) {//skip reducing if nothing to reduce
 											int groupIndex = vtarg.groupIndex;
 											//don't update min-vein, we'll do that next pass.
-											_ = Interlocked.Add(ref factory.veinGroups[groupIndex].amount, -consume);
+											var rem = Interlocked.Add(ref factory.veinGroups[groupIndex].amount, -consume);
 											_safeVeinAnim_largest_inline(ref factory.veinAnimPool[vpi]
 												, vtarg.amount >= 20000 ? 0f : (1f - (float)vtarg.amount * 5E-05f)
 											);
-											//clean up if we're the ones that ate the last of the vein.
-											if(vtarg.amount <= 0) {
-												//these are *very not worth* reimplementing to be thread safe...
-												//  so use the same lock that original uses.
+											//clean up if we sent it to 0
+											if(rem <= 0) {
+												//lock and < for safety; would be better if we could lock on marking it in-progress
+												// so the others can early-exit waiting, but thats Hard without taking control of fac.RVWC.
 												lock(veinPool) {
 													if(vtarg.id == vpi) {//make sure nobody else killed it
 														factory.RemoveVeinWithComponents(vpi);
@@ -361,7 +361,7 @@ namespace Eirshy.DSP.VeinityProject {
 										}
 									}
 									__instance.productCount += realized;
-									Interlocked.Add(ref productRegister[__instance.productId], realized);
+									_ = Interlocked.Add(ref productRegister[__instance.productId], realized);
 									_safeAddFlagsToFactory_inline(ref factory, veinType);
 									__instance.time -= __instance.period * realized;
 								}
@@ -432,6 +432,7 @@ namespace Eirshy.DSP.VeinityProject {
 		/// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static bool _iu_cycleSeed_inline(ref uint curSeed, in float miningRate) {
+			//todo: a where-tf-this-lives note
 			curSeed = (uint)((ulong)(curSeed % 2147483646U + 1U) * 48271UL % 2147483647UL) - 1U;
 			return (curSeed / 2147483646.0 < (double)miningRate);
 		}

@@ -10,7 +10,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             Factory, Logistics, Gatherer, PowerDelivery, Generator, SphereDepoly, LogTower, Military,
             Acc, Fuel, Sphere, Science, Spray, Other,
             Raw, Refined, Component,
-            Bullet, Shell, PlasBall, Missile,
+            Bullet, Arty, PlasBall, Missile,
             LogisticsDrone, TroopGround, TroopSpace,
             FogMats,
         }
@@ -31,7 +31,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item FacAss3 => new Item(2305, _Roles.Factory);
         public static Item FacAssFog => new Item(2318, _Roles.Factory);
         public static Item FacChem => new Item(2309, _Roles.Factory);
-        public static Item FacChemFog => new Item(2317, _Roles.Factory);
+        public static Item FacChem2 => new Item(2317, _Roles.Factory);
         public static Item FacFract => new Item(2314, _Roles.Factory);
         public static Item FacLab => new Item(2901, _Roles.Factory);
         public static Item FacLabFog => new Item(2902, _Roles.Factory);
@@ -52,9 +52,8 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item LogSpray => new Item(2313, _Roles.Logistics);
         public static Item LogBox => new Item(2101, _Roles.Logistics);
         public static Item LogBox2 => new Item(2102, _Roles.Logistics);
-        public static Item LogTank => new Item(2016, _Roles.Logistics);
-        public static Item LogPiler => new Item(2106, _Roles.Logistics);
-        public static Item LogPilerAlt => new Item(2040, _Roles.Logistics);
+        public static Item LogTank => new Item(2106, _Roles.Logistics);
+        public static Item LogPiler => new Item(2040, _Roles.Logistics);
         public static Item LogMonitor => new Item(2030, _Roles.Logistics);
         #endregion
         #region GET raw resources
@@ -84,7 +83,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         #endregion
         #region TOWers
         public static Item TowChest => new Item(2107, _Roles.LogTower);
-        public static Item TowInter => new Item(2104, _Roles.LogTower);
+        public static Item TowSystem => new Item(2104, _Roles.LogTower);
         public static Item TowPlanet => new Item(2103, _Roles.LogTower);
         public static Item TowOrbit => new Item(2105, _Roles.LogTower);
         #endregion
@@ -139,7 +138,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item SciWhite => new Item(6006, _Roles.Science);
         #endregion
         #region Spray-paint
-        public static Item Spray => new Item(1141, _Roles.Spray);
+        public static Item Spray1 => new Item(1141, _Roles.Spray);
         public static Item Spray2 => new Item(1142, _Roles.Spray);
         public static Item Spray3 => new Item(1143, _Roles.Spray);
         #endregion
@@ -230,26 +229,26 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         #endregion
 
         #region Bullet
-        public static Item BulletOne => new Item(1601, _Roles.Bullet);
-        public static Item BulletTwo => new Item(1602, _Roles.Bullet);
-        public static Item BulletThree => new Item(1603, _Roles.Bullet);
+        public static Item Bullet1 => new Item(1601, _Roles.Bullet);
+        public static Item Bullet2 => new Item(1602, _Roles.Bullet);
+        public static Item Bullet3 => new Item(1603, _Roles.Bullet);
 
         #endregion
-        #region Shell
-        public static Item ShellOne => new Item(1604, _Roles.Shell);
-        public static Item ShellTwo => new Item(1605, _Roles.Shell);
-        public static Item ShellThree => new Item(1606, _Roles.Shell);
+        #region Artillery (Arty)
+        public static Item Arty1 => new Item(1604, _Roles.Arty);
+        public static Item Arty2 => new Item(1605, _Roles.Arty);
+        public static Item Arty3 => new Item(1606, _Roles.Arty);
 
         #endregion
-        #region PlasBall
-        public static Item PbOne => new Item(1607, _Roles.PlasBall);
-        public static Item PbTwo => new Item(1608, _Roles.Shell);
+        #region Plasma Ball (Pb)
+        public static Item Pb1 => new Item(1607, _Roles.PlasBall);
+        public static Item Pb2 => new Item(1608, _Roles.PlasBall);
 
         #endregion
         #region Missile
-        public static Item MissileOne => new Item(1609, _Roles.Missile);
-        public static Item MissileTwo => new Item(1610, _Roles.Missile);
-        public static Item MissileThree => new Item(1611, _Roles.Missile);
+        public static Item Missile1 => new Item(1609, _Roles.Missile);
+        public static Item Missile2 => new Item(1610, _Roles.Missile);
+        public static Item Missile3 => new Item(1611, _Roles.Missile);
 
         #endregion
 
