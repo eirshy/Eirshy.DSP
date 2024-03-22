@@ -350,9 +350,11 @@ namespace Eirshy.DSP.VeinityProject {
 												// so the others can early-exit waiting, but thats Hard without taking control of fac.RVWC.
 												lock(veinPool) {
                                                     if(vtarg.id == vpi) {//make sure nobody else killed it
+														var type = (int)vtarg.type;
+														var pos = vtarg.pos;
 														factory.RemoveVeinWithComponents(vpi);
 														factory.RecalculateVeinGroup(groupIndex);
-														factory.NotifyVeinExhausted((int)vtarg.type, vtarg.pos);
+														factory.NotifyVeinExhausted(type, pos);
 													}
 												}
 												//Pruning happens on the pass after the vein is zero'd.
