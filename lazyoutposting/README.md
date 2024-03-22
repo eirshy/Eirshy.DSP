@@ -18,6 +18,7 @@ If you turn that on, we'll run as close to vanilla as possible, but without, for
 
 ## Changes
 
+- v1.4.3 Fix for miner prebuilds not getting the memo about vein depletion.
 - v1.4.2 Fix for rebuilding miners, more probably
 - v1.4.1 Fix for rebuilding miners, probably
 - v1.4.0 Added "Optimizations Only" mode for Dwarves.

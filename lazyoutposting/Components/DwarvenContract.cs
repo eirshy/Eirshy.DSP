@@ -282,28 +282,21 @@ namespace Eirshy.DSP.LazyOutposting.Components {
             ref var miner = ref __instance.factorySystem.minerPool[minerId];
             ref var sign = ref __instance.entitySignPool[entityId];
 
-            //We can't easily pull the 2048 out of VeinCollectors on rebuild, so...
-
-
-            if(desc.isVeinCollector && prebuild.paramCount >= 2048) {
-                //Special handling for when the 2048 survived
-                miner.veins = new int[prebuild.paramCount - 2048];
-                Array.Copy(prebuild.parameters, 2048, miner.veins, 0, miner.veins.Length);
-                miner.veinCount = miner.veins.Length;
-            } else if( //Vein Heigh Check Skip
-                prebuild.isDestroyed || Mission.HasShovels || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein)
-            ) {
-                //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
-                miner.veins = new int[prebuild.paramCount];
-                Array.Copy(prebuild.parameters ?? Array.Empty<int>(), 0, miner.veins, 0, prebuild.paramCount);
-                miner.veinCount = prebuild.paramCount;
-                //miner.ArrangeVeinArray();//we exact-sized it, no need
-            } else {
-                var kept = new List<int>(prebuild.paramCount);
-                var lpose = new Pose(prebuild.pos, prebuild.rot);
-                for(int i = prebuild.paramCount; i-- > 0;) {
-                    var vpi = prebuild.parameters[i];
-                    if(vpi <= 0) continue;
+            //We can't easily pull the 2048 out of VeinCollectors on rebuild
+            //We also can't avoid verifying all the veins we're copying are "still" "real"
+            // We could theoretically do a batch copy then iterate and set any outof range to 0,
+            // then let the miner tick's prune handle it, but that's partly dependent on how Veinity
+            // prunes and doesn't escape iterating through everything once, so not really worth the
+            // complexity
+            int offset = desc.isVeinCollector && prebuild.paramCount >= 2048 ? 2048 : 0;
+            bool noRangeTest = prebuild.isDestroyed || Mission.HasShovels || (!Mission.HaulersNotActive && desc.minerType == EMinerType.Vein);
+            var kept = new List<int>(prebuild.paramCount);
+            var lpose = new Pose(prebuild.pos, prebuild.rot);
+            for(int i = prebuild.paramCount; i-- > offset;) {
+                var vpi = prebuild.parameters[i];
+                if(vpi <= 0) continue;
+                if(noRangeTest) kept.Add(vpi);
+                else {
                     var vpos = __instance.veinPool[vpi].pos;
                     if(vpos.magnitude < __instance.planet.realRadius - 40f) {
                         vpos = vpos.normalized * __instance.planet.realRadius;
@@ -312,12 +305,13 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                         kept.Add(vpi);
                     }
                 }
-
-                //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
-                miner.veins = kept.ToArray();
-                miner.veinCount = miner.veins.Length;
-                //miner.ArrangeVeinArray();//.ToArray is exact-sized, no need
             }
+            //miner.InitVeinArray(prebuild.paramCount);//effectively unwrapped
+            miner.veins = kept.ToArray();
+            miner.veinCount = miner.veins.Length;
+            //miner.ArrangeVeinArray();//.ToArray is exact-sized, no need
+
+
             if(prebuild.filterId <= 0 && miner.veinCount >= 0) {
                 prebuild.filterId = __instance.veinPool[miner.veins[0]].productId;
             }
