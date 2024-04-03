@@ -18,6 +18,7 @@ namespace Eirshy.DSP.Rythmn.Logging {
         public ManualLogSource BepIn => null;
         public void Log(string msg) { }
         public void LogStanza(Type verse, string name) { }
+        public void LogRecoverable(string msg, Exception ex) { }
         public void LogFatal(Exception ex) { }
         public void FlushLogBuffer() { }
     }

@@ -26,6 +26,10 @@ namespace Eirshy.DSP.Rythmn.Logging {
         /// </summary>
         void LogStanza(Type verse, string stanza);
         /// <summary>
+        /// Logs that we've encountered a recoverable error.
+        /// </summary>
+        void LogRecoverable(string msg, Exception ex = null);
+        /// <summary>
         /// Logs that we've encountered a fatal error.
         /// </summary>
         void LogFatal(Exception ex);

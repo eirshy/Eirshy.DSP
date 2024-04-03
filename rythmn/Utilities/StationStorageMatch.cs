@@ -10,7 +10,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
     /// <summary>
     /// Simple descriptor of a StationStorage value based on Remote/Local config and optionally ItemID
     /// </summary>
-    public struct StationStorageMatch {
+    public readonly struct StationStorageMatch {
         #region Code, our single-char listing
         
         public enum Code {

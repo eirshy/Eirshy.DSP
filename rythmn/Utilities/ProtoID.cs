@@ -7,13 +7,13 @@ using System.Linq;
 namespace Eirshy.DSP.Rythmn.Utilities {
     public abstract class ProtoID {
         public abstract int Id { get; }
-        protected string AsString { get; set; }
+        protected virtual string AsString { get; set; }
 
         public string GetName() {
             _GenerateName();
             return AsString;
         }
-        public string GetFullName() => GetType().Name + "." + GetName();
+        public string GetFullName() => $"{GetType().Name}.{GetName()}";
 
         /// <summary>
         /// Generates this entity's name if it hasn't been generated yet.
@@ -22,9 +22,12 @@ namespace Eirshy.DSP.Rythmn.Utilities {
 
         public override int GetHashCode() => Id.GetHashCode();
         public override string ToString() => GetFullName();
-        
+
 
         public ItemProto Proto => LDB.items.Select(Id);
+        public PrefabDesc Prefab => Proto.prefabDesc;
+        public List<RecipeProto> Recipes => Proto.recipes;
+        public List<RecipeProto> Makes => Proto.makes;
 
     }
 
@@ -59,7 +62,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         /// <summary>
         /// <c>(RM)</c>Source; Reflection magic to get all possible values of our "enum" as a dictionary
         /// </summary>
-        private readonly static Lazy<IDictionary<int, TImplementor>> __all = new Lazy<IDictionary<int, TImplementor>>(()=>{
+        private readonly static Lazy<IDictionary<int, TImplementor>> __all = new(()=>{
             #region ... ... ... ... ...
             var props = typeof(TImplementor).GetProperties(
                 BindingFlags.Public | BindingFlags.Static
@@ -137,7 +140,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
 
         //To/from nullable integer
         /// <summary>
-        /// from-in?t; throws InvalidCastException if the given integer cannot be converted
+        /// from-int?; throws InvalidCastException if the given integer cannot be converted
         /// </summary>
         /// <exception cref="InvalidCastException" />
         public static explicit operator ProtoID<TImplementor>(int? ni) {

@@ -10,6 +10,8 @@ using System.Linq;
 //-- Eirshy
 
 namespace Eirshy.DSP.Rythmn {
+    //TODO: add Dispensers to more than just the basic-instance options
+    //TODO: merge Has/HasActive (there's no reason to have the distinction
 
     /// <summary>
     /// A wrapper struct for factory-paired EntityData that provides for easy
@@ -26,7 +28,7 @@ namespace Eirshy.DSP.Rythmn {
     /// <br />powerCons.idleEnergyPerTick = 0;//remove idle power consumption
     /// </c>
     /// </remarks>
-    public struct EntityRef {
+    public readonly struct EntityRef {
         public PlanetFactory Factory { get; }
         public int EntityId { get; }
 
@@ -653,6 +655,39 @@ namespace Eirshy.DSP.Rythmn {
         /// Checks whether both our Entity and the component match eachother.
         /// </summary>
         public bool CheckCircular(ref StationComponent cmp) => Entity.id == cmp.entityId && Entity.stationId == cmp.id;
+
+        #endregion
+        #region Basic-Instance DispenserComponent 
+        /// <summary>
+        /// True if our Entity's dispenserId does not point to the null DispenserComponent
+        /// </summary>
+        public bool Has_DispenserComponent => Entity.dispenserId != 0;
+        /// <summary>
+        /// Whether our DispenserComponent in Factory matches our Entity.
+        /// </summary>
+        /// <remarks>
+        /// Equivalent to calling <c>CheckEntity</c> on the result of <c>GetLive_DispenserComponent</c>
+        /// <br />
+        /// Provided first-class because this is the relationship the game itself checks (circa v0.9.24)
+        /// </remarks>
+        public bool HasActive_DispenserComponent => Entity.id == Factory.transport.dispenserPool[Entity.dispenserId].entityId;
+        /// <summary>
+        /// Gets a live reference to the DispenserComponent this entity points to.
+        /// <br />DO NOT edit it directly! Save it to a local ref-var first!
+        /// </summary>
+        public ref DispenserComponent GetLive_DispenserComponent() => ref Factory.transport.dispenserPool[Entity.dispenserId];
+        /// <summary>
+        /// Checks whether the component matches our Entity
+        /// </summary>
+        public bool CheckEntity(ref DispenserComponent cmp) => Entity.id == cmp.entityId;
+        /// <summary>
+        /// Checks whether our Entity matches the component
+        /// </summary>
+        public bool CheckComponent(ref DispenserComponent cmp) => Entity.dispenserId == cmp.id;
+        /// <summary>
+        /// Checks whether both our Entity and the component match eachother.
+        /// </summary>
+        public bool CheckCircular(ref DispenserComponent cmp) => Entity.id == cmp.entityId && Entity.dispenserId == cmp.id;
 
         #endregion
         #region Basic-Instance PowerGeneratorComponent 

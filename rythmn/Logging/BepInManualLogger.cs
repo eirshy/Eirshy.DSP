@@ -22,6 +22,7 @@ namespace Eirshy.DSP.Rythmn.Logging {
 
         public void Log(string msg) => BepIn.LogMessage(LoggingFormatters.Log(msg));
         public void LogStanza(Type verse, string name) => BepIn.LogMessage(LoggingFormatters.LogStanza(verse, name));
+        public void LogRecoverable(string msg, Exception ex) => BepIn.LogError(LoggingFormatters.LogRecoverable(msg, ex));
         public void LogFatal(Exception ex) => BepIn.LogFatal(LoggingFormatters.LogFatal(ex));
 
         void ILogProvider.FlushLogBuffer() { }

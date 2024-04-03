@@ -176,6 +176,19 @@ namespace Eirshy.DSP.Rythmn {
         /// Logs that this verse is calling the given stanza.
         /// </summary>
         void LogStanza(string name) => LogProvider?.LogStanza(GetType(), name);
+
+        /// <summary>
+        /// Logs that we've encountered a recoverable error.
+        /// </summary>
+        protected void LogRecoverable(string msg, Exception caught = null) {
+            LogProvider?.LogRecoverable(msg, caught);
+        }
+        /// <summary>
+        /// Logs that we've encountered a recoverable error.
+        /// </summary>
+        protected void LogRecoverable(Exception caught) {
+            LogProvider?.LogRecoverable(null, caught);
+        }
         /// <summary>
         /// Logs that we've encountered a fatal error.
         /// </summary>

@@ -369,7 +369,7 @@ namespace Eirshy.DSP.Rythmn {
 
             comp.canStack = desc.inserterCanStack;
             comp.delay = desc.inserterDelay;
-            comp.stackSize = desc.inserterStackSize;
+            comp.stackCount = desc.inserterStackSize;
 
         }
         static void SyncLab(EntityRef entr) {
