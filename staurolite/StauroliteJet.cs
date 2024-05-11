@@ -140,6 +140,7 @@ namespace Eirshy.DSP.Staurolite {
                         }
                         //cycle splout, filter mode prevents other item types
                         if(outAt > 0) splout = ref splouts[--outAt];
+                        else splout.Picked = true;//pretend we were picked, so we skip
                     }
                     //fitler done, pair rest
                     if(!splout.Picked) {
@@ -202,19 +203,19 @@ namespace Eirshy.DSP.Staurolite {
                     switch(outAt) {
                         //we can bail early on failed output- we're out of things to output
                         case 4:
-                            filter = -2;
+                            filter = -sp.outFilter;
                             if(!_spltr_buffered_inline(in sp, ref splouts[3], ref filter, in piling, in __instance, ref cycleOut)) break;
                             goto case 3;
                         case 3:
-                            filter = -2;
+                            filter = -sp.outFilter;
                             if(!_spltr_buffered_inline(in sp, ref splouts[2], ref filter, in piling, in __instance, ref cycleOut)) break;
                             goto case 2;
                         case 2:
-                            filter = -2;
+                            filter = -sp.outFilter;
                             if(!_spltr_buffered_inline(in sp, ref splouts[1], ref filter, in piling, in __instance, ref cycleOut)) break;
                             goto case 1;
                         case 1:
-                            filter = -2;
+                            filter = -sp.outFilter;
                             _ = _spltr_buffered_inline(in sp, ref splouts[0], ref filter, in piling, in __instance, ref cycleOut);
                             break;
                     }

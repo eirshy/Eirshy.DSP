@@ -1,6 +1,6 @@
 ﻿{
   "name": "Staurolite",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/eirshy/Eirshy.DSP",
   "description": "Rewrites Splitters, dragging them out of a performance hole and optionally adding piling.",
   "dependencies": [
