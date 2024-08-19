@@ -184,7 +184,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
                 Vector3 centerFuzzy = pv.lpos.normalized * __instance.controller.cmd.test.magnitude + forward * centerOffset;
 
                 //no need to pre-clear _tmp_ids; not only does GVIANA do it, but it's also unnecessary in the first place
-                var localVeins = __instance.actionBuild.nearcdLogic.GetVeinsInAreaNonAlloc(centerFuzzy, fuzzyDist, ____tmp_ids);
+                var localVeins = __instance.actionBuild.nearcdLogic.GetVeinsInAreaNonAlloc(centerFuzzy, fuzzyDist, ref ____tmp_ids);
 
                 EVeinType forType = EVeinType.None;
                 bool useLongPicks = Mission.HasLongPicks;//force hoist to local
