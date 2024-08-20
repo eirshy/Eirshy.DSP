@@ -21,6 +21,9 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             set => IsInput = !value;
         }
 
+        public readonly IdCount CurrentRaw => (Id, Count);
+        public readonly ItemCount Current => (Item, Count);
+
         readonly int[] _ids => IsInput ? Recipe?.Items : Recipe?.Results;
         readonly int[] _counts => IsInput ? Recipe?.ItemCounts : Recipe?.ResultCounts;
 
@@ -83,20 +86,27 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             return WashHands();
         }
 
+        public Chef OnTest(bool test, Action<Chef> onTrue, Action<Chef> onFalse = null) {
+            if(IsFaulted) return this;
+            if(test) onTrue?.Invoke(this);
+            else onFalse?.Invoke(this);
+            return this;
+        }
+
         public Chef OnSuccess(Action<Chef> onSuccess) {
-            if(!IsFaulted) onSuccess(this);
+            if(!IsFaulted && onSuccess != null) onSuccess(this);
             return this;
         }
         public Chef OnSuccess(Func<Chef, Chef> onSuccess) {
-            if(!IsFaulted) return onSuccess(this);
+            if(!IsFaulted && onSuccess != null) return onSuccess(this);
             return this;
         }
         public Chef OnFail(Action<Chef> onFaulted) {
-            if(IsFaulted) onFaulted(this);
+            if(IsFaulted && onFaulted != null) onFaulted(this);
             return this;
         }
         public Chef OnFail(Func<Chef, Chef> onFaulted) {
-            if(IsFaulted) return onFaulted(this);
+            if(IsFaulted && onFaulted != null) return onFaulted(this);
             return this;
         }
 
@@ -114,7 +124,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
                 Id = _ids[At];
                 Count = _counts[At];
 
-                IsFaulted = false;
+                //IsFaulted = false;
                 return this;
             }
         }
@@ -191,11 +201,11 @@ namespace Eirshy.DSP.Rythmn.Utilities {
 
         Chef _setId(int id) { Id = id; return this; }
         Chef _setCount(int count) { Count = count; return this; }
-        Chef _setCount(double count) { Count = count.TruncInt(); return this; }
+        Chef _setCount(double count) { Count = count.ToIntTrunc(); return this; }
         Chef _setAt(int at) { At = at; return this; }
 
         Chef _setCur(int id, int count) { Id = id; Count = count; return this; }
-        Chef _setCur(int id, double count) { Id = id; Count = count.TruncInt(); return this; }
+        Chef _setCur(int id, double count) { Id = id; Count = count.ToIntTrunc(); return this; }
         Chef _setAll(int id, int count, int at) { Id = id; Count = count; At = at; return this; }
 
         Chef _useInputs() { IsInput = true; return this; }
@@ -234,6 +244,12 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         }
 
         public Chef FindInput(int itemId) => _useInputs()._setAt(Array.IndexOf(_ids, itemId))._load();
+        public Chef FindInputFirstOf(params int[] itemId) {
+            _useInputs();
+            var real = _ids;
+            var matched = itemId.Select(id => Array.IndexOf(real, id) +1).First(x => x > 0);
+            return _setAt(matched -1)._load();
+        }
         public Chef FindResult(int itemId) => _useResults()._setAt(Array.IndexOf(_ids, itemId))._load();
 
         #endregion
@@ -255,20 +271,20 @@ namespace Eirshy.DSP.Rythmn.Utilities {
 
         #endregion
         #region List Rewrites
-        public Chef AddItem(int itemId, int qty) => AddItems((itemId, qty));
+        public Chef AddInput(int itemId, int qty) => AddInputs((itemId, qty));
         public Chef AddResult(int itemId, int qty) => AddResults((itemId, qty));
 
-        public Chef AddItems(params IdCount[] toAdd) => _useInputs()._addList(toAdd).WashHands();
-        public Chef AddItems(params ItemCount[] toAdd) => _useInputs()._addList(toAdd).WashHands();
+        public Chef AddInputs(params IdCount[] toAdd) => _useInputs()._addList(toAdd).WashHands();
+        public Chef AddInputs(params ItemCount[] toAdd) => _useInputs()._addList(toAdd).WashHands();
         public Chef AddResults(params IdCount[] toAdd) => _useResults()._addList(toAdd).WashHands();
         public Chef AddResults(params ItemCount[] toAdd) => _useResults()._addList(toAdd).WashHands();
 
-        public Chef OverwriteAllItems(params IdCount[] with) => _useInputs()._setList(with).WashHands();
-        public Chef OverwriteAllItems(params ItemCount[] with) => _useInputs()._setList(with).WashHands();
+        public Chef OverwriteAllInputs(params IdCount[] with) => _useInputs()._setList(with).WashHands();
+        public Chef OverwriteAllInputs(params ItemCount[] with) => _useInputs()._setList(with).WashHands();
         public Chef OverwriteAllResults(params IdCount[] with) => _useResults()._setList(with).WashHands();
         public Chef OverwriteAllResults(params ItemCount[] with) => _useResults()._setList(with).WashHands();
 
-        public Chef CopyItems(RecipeProto from) {
+        public Chef CopyInputs(RecipeProto from) {
             if(Recipe is null) return this;
             IsFaulted = true;
 
@@ -306,6 +322,25 @@ namespace Eirshy.DSP.Rythmn.Utilities {
 
             return WashHands();
         }
+
+        Chef _tossIds(int[] ids, bool inverse) {
+            if(IsFaulted) return this;
+            var real = _ids;
+            var matched = ids.Select(x=> Array.IndexOf(real, x)).Where(x => x!= -1).ToList();
+            var lastToss = -1;
+            for(int i = real.Length; i-->0;) {
+                var isMatch = matched.Contains(i);
+                if(!isMatch ^ inverse) continue;
+                real[i] = 0;
+                lastToss = i;
+            }
+            if(lastToss != -1) return _setAt(lastToss)._load();
+            else return this;
+        }
+        public Chef TossInputs(params int[] itemIds) => _useInputs()._tossIds(itemIds, false);
+        public Chef TossInputsExcept(params int[] itemIds) => _useInputs()._tossIds(itemIds, true);
+        public Chef TossResults(params int[] itemIds) => _useResults()._tossIds(itemIds, false);
+        public Chef TossResultsExcept(params int[] itemIds) => _useResults()._tossIds(itemIds, true);
 
         #endregion
 
@@ -361,9 +396,9 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         }
         public readonly Chef SetTime(RecipeProto like) => SetTime(like.TimeSpend);
         public readonly Chef SetTime(Func<int, int> reducer) => SetTime(reducer(Recipe.TimeSpend));
-        public readonly Chef SetTime(Func<int, double> reducer) => SetTime(reducer(Recipe.TimeSpend).TruncInt());
+        public readonly Chef SetTime(Func<int, double> reducer) => SetTime(reducer(Recipe.TimeSpend).ToIntTrunc());
         public readonly Chef SetTime(RecipeProto like, Func<int, int> reducer) => SetTime(reducer(like.TimeSpend));
-        public readonly Chef SetTime(RecipeProto like, Func<int, double> reducer) => SetTime(reducer(like.TimeSpend).TruncInt());
+        public readonly Chef SetTime(RecipeProto like, Func<int, double> reducer) => SetTime(reducer(like.TimeSpend).ToIntTrunc());
 
         #endregion
 
@@ -379,9 +414,13 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Chef CookFirstMaking(this IEnumerable<RecipeProto> recipes, int itemId) {
             return (Chef)recipes.FirstOrDefault(r => r.Results.Contains(itemId));
         }
+        public static Chef CookFirstNotMadeBy(this IEnumerable<RecipeProto> recipes, int itemId) {
+            return (Chef)recipes.FirstOrDefault(r => !r.Items.Contains(itemId));
+        }
 
-        public static Chef CookFirst(this IEnumerable<RecipeProto> recipes, Func<RecipeProto, bool> predicate) {
-            return (Chef)recipes.FirstOrDefault(predicate);
+        public static Chef CookFirst(this IEnumerable<RecipeProto> recipes, Func<RecipeProto, bool> predicate = null) {
+            if(predicate is null) return (Chef)recipes.FirstOrDefault();
+            else return (Chef)recipes.FirstOrDefault(predicate);
         }
 
         public static IEnumerable<IdCount> WalkItems(this RecipeProto recipe) {
@@ -395,7 +434,5 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             }
         }
 
-
-        public static int TruncInt(this double dbl) => (int)Math.Truncate(dbl);
     }
 }

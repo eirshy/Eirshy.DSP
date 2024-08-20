@@ -13,7 +13,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             Bullet, Shell, PlasBall, Missile, Jamming,
             LogisticsDrone, TroopGround, TroopSpace,
             FogMats,
-            Mod_MoreMega
+            Mod_MoreMega, Mod_EmptyFuelRod
         }
         public override int Id { get; }
         protected override string AsString { 
@@ -29,6 +29,8 @@ namespace Eirshy.DSP.Rythmn.Utilities {
             var set = new HashSet<_Roles>(roles);
             return _GetAll().Where(i => set.Contains(i.Role));
         }
+
+        public int _IsNthOf(params Item[] items) => Array.IndexOf(items, Id);
 
         #region FACtories
         public static Item FacAss => new(2303, _Roles.Factory);
@@ -259,9 +261,9 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item Shell3 => new(1606, _Roles.Shell);
 
         #endregion
-        #region Plasma Ball (Pb)
-        public static Item Pb1 => new(1607, _Roles.PlasBall);
-        public static Item Pb2 => new(1608, _Roles.PlasBall);
+        #region Plasma Ball
+        public static Item PlasBall1 => new(1607, _Roles.PlasBall);
+        public static Item PlasBall2 => new(1608, _Roles.PlasBall);
 
         #endregion
         #region Missile
@@ -305,7 +307,7 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         #endregion
 
         #region Mod_MoreMega
-        public static Item MM_Mfc => new(9500, _Roles.Refined);
+        public static Item MM_Mfc => new(9500, _Roles.Mod_MoreMega);
         public static Item MM_InterAssTower => new(9512, _Roles.LogTower);
 
         public static Item MM_RocketMatDecomp => new Item(9488, _Roles.Sphere);
@@ -345,6 +347,12 @@ namespace Eirshy.DSP.Rythmn.Utilities {
         public static Item MM_CryRayrOptical => new Item(9502, _Roles.Mod_MoreMega);
 
 
+
+        #endregion
+        #region Mod_EmptyFuelRods
+
+        public static Item EmptyFuelDT => new Item(9451, _Roles.Mod_EmptyFuelRod);
+        public static Item EmptyFuelAM => new Item(9452, _Roles.Mod_EmptyFuelRod);
 
         #endregion
     }

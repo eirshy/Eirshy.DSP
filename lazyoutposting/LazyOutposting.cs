@@ -14,6 +14,7 @@ using HarmonyLib;
 
 using Eirshy.DSP.LazyOutposting.Components;
 using System.Reflection.Emit;
+using Eirshy.DSP.LazyOutposting.Bugfix;
 
 namespace Eirshy.DSP.LazyOutposting {
 
@@ -46,7 +47,7 @@ namespace Eirshy.DSP.LazyOutposting {
         internal static bool GiveDwarvesShovels { get; private set; } = false;
         internal static bool GiveDwarvesLongPicks { get; private set; } = false;
 
-        internal static readonly Lazy<bool> VeinityProjectExists = new Lazy<bool>(
+        internal static readonly Lazy<bool> VeinityProjectExists = new(
             ()=>BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(OTHERMOD_VEINITYPROJECT)
             , LazyThreadSafetyMode.PublicationOnly
         );
@@ -190,47 +191,6 @@ namespace Eirshy.DSP.LazyOutposting {
                 fi.SetValue(ret, fi.GetValue(from));
             }
             return ret;
-        }
-
-
-        private static class Bugfix_v1_3_lt3 {
-            [HarmonyPostfix]
-            [HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
-            static void FixDisconnectedMinerStations() {
-                if(DSPGame.IsMenuDemo) return;
-                Logs.LogWarning($"Looking for Disconnected Vein Collectors...");
-                var gdat = GameMain.data;
-                var found = 0;
-                var potential = gdat.factories
-                    .Where(pf => pf != null && pf.transport != null && pf.transport.stationPool != null)
-                    .ToList()
-                ;
-                //entity visitor, parallelize, but do so per-planet to keep it "simple"
-                potential.AsParallel().ForAll(pf => {
-                    foreach(var station in pf.transport.stationPool) {
-                        if(false
-                            || station == null
-                            || !station.isVeinCollector
-                            || station.entityId == 0 
-                            || station.minerId != 0
-                        ) continue;
-                        station.minerId = pf.entityPool[station.entityId].minerId;
-                        _ = Interlocked.Increment(ref found);
-                    }
-                });
-                Logs.LogWarning($"...Found and re-linked {found} Vein Collectors across {potential.Count} factories!");
-            }
-        }
-
-    }
-
-    internal static class Extensions {
-        /// <summary>
-        /// Convenience; replaces the opcode and the operand on this instruction
-        /// </summary>
-        public static void Reop(this CodeInstruction ci, OpCode op, object operand = null) {
-            ci.opcode = op;
-            ci.operand = operand;
         }
     }
 }
