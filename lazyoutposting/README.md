@@ -10,24 +10,24 @@ but only if you also install my other mod, ***VeinityProject***.
 
 All options are toggleable, so you can freely decide just how lazy you want to be.
 
-## But didn't you also optimize some of the code? What if I just want that!
+### But didn't you also optimize some of the code? What if I just want that!
 
 Each config section with more than one option will have an off-by-default "Optimizations Only" setting.
 If you turn that on, we'll run as close to vanilla as possible, but without, for example, thrashing over 8kb of memory every
 17 miliseconds because you're hovering a Miner mk2 over nothing.
 
-## Changes
+## Controls
+#### HAULERS
+- Press *PageUp* to cycle forwards in the hauler resource list.
+- Press *PageDown* to cycle backwards in the hauler resource list.
 
+## Changes
 - v1.4.4 Fix for game version 0.10.30.23310
 - v1.4.3 Fix for miner prebuilds not getting the memo about vein depletion.
 - v1.4.2 Fix for rebuilding miners, more probably
 - v1.4.1 Fix for rebuilding miners, probably
 - v1.4.0 Added "Optimizations Only" mode for Dwarves.
 - v1.3.5 Fix for miners (broke last version lol)
-
-## Controls
-- Press *PageUp* to cycle forwards in the hauler resource list.
-- Press *PageDown* to cycle *backwards* in the hauler resource list.
 
 ## AUTOMATED BUGFIXES
 - **v1.3.0 through v1.3.2**:<br />
