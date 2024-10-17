@@ -22,11 +22,11 @@ If you turn that on, we'll run as close to vanilla as possible, but without, for
 - Press *PageDown* to cycle backwards in the hauler resource list.
 
 ## Changes
+- v1.4.5 Fix for Genesis Book and most other EVeinType editors
 - v1.4.4 Fix for game version 0.10.30.23310
 - v1.4.3 Fix for miner prebuilds not getting the memo about vein depletion.
 - v1.4.2 Fix for rebuilding miners, more probably
 - v1.4.1 Fix for rebuilding miners, probably
-- v1.4.0 Added "Optimizations Only" mode for Dwarves.
 - v1.3.5 Fix for miners (broke last version lol)
 
 ## AUTOMATED BUGFIXES

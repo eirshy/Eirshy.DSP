@@ -111,7 +111,7 @@ namespace Eirshy.DSP.LazyOutposting.Components {
 
                 #endregion
                 //array-style dictionary
-                _dwarfTargets = new bool[(int)allEVT.Max()];
+                _dwarfTargets = new bool[(int)allEVT.Max() + 1];
                 for(int vti = validTargets.Count; vti-- > 0;) {
                     _dwarfTargets[(int)validTargets[vti]] = true;
                 }
