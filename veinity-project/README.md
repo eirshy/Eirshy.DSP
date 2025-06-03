@@ -15,6 +15,7 @@ In particular, planets with a *lot* of miners and oil pumps will see a... well, 
 But they're also a lot more friendly to heavier multithreading and thus *could* see more of a gain in the future.
 
 ## Changes
+- v0.2.8 Possible fix for possible rounding issue on vein consumption in Diminishing mode
 - v0.2.7 Fix for game version 0.10.32.25779 (matching game's removal of PRNG mining consumption code)
 - v0.2.6 Actually Working fix for game version 0.10.29.22010 lol (ref var is ref, duh)
 - v0.2.5 Fix for game version 0.10.29.22010

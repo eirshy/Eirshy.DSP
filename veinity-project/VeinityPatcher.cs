@@ -66,11 +66,12 @@ namespace Eirshy.DSP.VeinityProject {
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(GameSave), nameof(GameSave.LoadCurrentGame), new[] { typeof(string) })]
 		public static void Precalc() {
-			var resMult = Math.Max(GameMain.data.gameDesc.resourceMultiplier, 5f / 12f);
-			var floatValue = MinerComponent.kOilAmountInvMultiplier;//decomp may transclude instead of reference
+			//we promote to doubles for rounding reasons
+			double resMult = Math.Max(GameMain.data.gameDesc.resourceMultiplier, 5.0 / 12.0);//orig used floats
+			double floatValue = MinerComponent.kOilAmountInvMultiplier;//decomp may transclude instead of reference
       DiminishingMiningRateModifier = floatValue / resMult;
     }
-    static float DiminishingMiningRateModifier { get; set; }
+    static double DiminishingMiningRateModifier { get; set; }
 
 
     [HarmonyPrefix]
@@ -321,6 +322,9 @@ namespace Eirshy.DSP.VeinityProject {
 					}
 					#endregion
 
+					//need promotion to maybe deal with rounding issues...
+					double miningRateDbl = miningRate;
+
 					//Move from Source to Internal Buffer
 					if(__instance.time >= __instance.period && __instance.productCount < Config.Buffer && prodID > 0) {
 						int potential = __instance.time / __instance.period;
@@ -341,7 +345,7 @@ namespace Eirshy.DSP.VeinityProject {
               case ESourceType.FiniteDepleting: {
                 #region Ensure Non-"oil" miningRate
                 if(__instance.type == EMinerType.Oil) {
-									miningRate /= DiminishingMiningRateModifier;//this was baked into us at by the caller
+									miningRateDbl /= DiminishingMiningRateModifier;//this was baked into us at by the caller
 								}
                 #endregion
                 #region pick finite target
@@ -377,10 +381,10 @@ namespace Eirshy.DSP.VeinityProject {
                 ref var vtarg = ref veinPool[vpi];
 								if(vtarg.amount > 0) {
 									int realized = potential;
-									if(miningRate > 0f) {
+									if(miningRateDbl > 0f) {
                     int eaten = 0;
                     #region calc Consumption, interpolate Realized, grow costFrac by remainder
-                    double hunger = __instance.costFrac + ((double)miningRate * potential);
+                    double hunger = __instance.costFrac + ((double)miningRateDbl * potential);
                     int maxEat = (int)hunger;
 
                     if(maxEat > 0) {
@@ -435,14 +439,14 @@ namespace Eirshy.DSP.VeinityProject {
 
 							#region case ESourceType.Diminishing: { ... } break;
 							case ESourceType.Diminishing: {
-								if(miningRate > 0f && vmax > Config.DiminishLimit) {
+								if(miningRateDbl > 0f && vmax > Config.DiminishLimit) {
                   #region Ensure "oil" miningRate
                   if(__instance.type != EMinerType.Oil) {
-                    miningRate *= DiminishingMiningRateModifier;//this was baked into us at by the caller
+                    miningRateDbl *= DiminishingMiningRateModifier;//this was baked into us at by the caller
                   }
                   #endregion
                   
-                  double hunger = __instance.costFrac + ((double)miningRate * potential);
+                  double hunger = __instance.costFrac + ((double)miningRateDbl * potential);
 									int maxEat = (int)hunger;
 									if(maxEat > 0) {
 										//Always hitting Fullest works mostly just fine.
